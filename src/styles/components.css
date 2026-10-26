@@ -1,0 +1,762 @@
+/**
+ * Komponen: tombol, field form, kartu, badge, ikon, spinner, toast, modal.
+ *
+ * [DOKUMEN] AI.md §5 daftar styles: src/styles/components.css.
+ * [DOKUMEN] UI/UX Wireframe Brief §3.4 (tabel komponen) dan §3.2 warna badge:
+ *           "Pendaftaran Dibuka" hijau, "Pendaftaran Ditutup" abu.
+ * [DOKUMEN] UI/UX Wireframe Brief §3.3 — kontras minimal WCAG AA.
+ *
+ * [USULAN] Kelas komponen tidak ada di PRD; mengikuti design system pada
+ *          tautan DesainPakeAI sebagai referensi gaya saja (tanpa halaman
+ *          /desain-sistem).
+ */
+
+/* ---------- Ikon ---------- */
+
+.ikon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ikon--kecil {
+  width: 16px;
+  height: 16px;
+}
+
+.ikon--besar {
+  width: 32px;
+  height: 32px;
+}
+
+.ikon--logo {
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  box-sizing: content-box;
+  border-radius: var(--radius-control);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.ikon--logo-besar {
+  width: 24px;
+  height: 24px;
+  padding: 10px;
+  box-sizing: content-box;
+  border-radius: var(--radius-control);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+/* ---------- Tombol ---------- */
+
+.tombol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-6);
+  border: var(--border-hairline) solid transparent;
+  border-radius: var(--radius-control);
+  font-size: var(--text-body-md);
+  font-weight: var(--weight-medium);
+  transition: background var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
+}
+
+.tombol--utama {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.tombol--utama:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.tombol--utama:active:not(:disabled) {
+  background: var(--color-primary-active);
+}
+
+.tombol--cadangan {
+  width: 100%;
+  background: var(--color-surface);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.tombol--cadangan:hover:not(:disabled) {
+  background: var(--color-surface-muted);
+}
+
+.tombol--tenggelam {
+  background: transparent;
+  border-color: transparent;
+  color: var(--color-text-soft);
+  text-decoration: underline;
+}
+
+.tombol--blok {
+  width: 100%;
+}
+
+.tombol:disabled {
+  opacity: var(--disabled-opacity);
+  cursor: not-allowed;
+}
+
+/* ---------- Field form ---------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+}
+
+.field__label {
+  font-size: var(--text-label-md);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-soft);
+}
+
+.field__wajib {
+  color: var(--color-danger);
+  margin-left: 2px;
+}
+
+.field__input,
+.field__textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-hairline) solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.field__textarea {
+  min-height: 120px;
+  resize: vertical;
+  line-height: var(--leading-body-md);
+}
+
+.field__input::placeholder,
+.field__textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+.field__input:focus,
+.field__textarea:focus {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-color: var(--color-text);
+}
+
+.field__bantuan {
+  margin: 0;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+}
+
+.field__counter {
+  margin: 0;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  text-align: right;
+}
+
+.field__counter--lewat {
+  color: var(--color-danger);
+  font-weight: var(--weight-medium);
+}
+
+.field__error {
+  margin: 0;
+  font-size: var(--text-body-sm);
+  color: var(--color-danger);
+}
+
+.field--error .field__input,
+.field--error .field__textarea {
+  border-color: var(--color-danger);
+}
+
+/* ---------- Checkbox ---------- */
+
+.checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.checkbox__input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.checkbox__label {
+  font-size: var(--text-body-md);
+  color: var(--color-text-soft);
+}
+
+/* ---------- Kartu ---------- */
+
+.kartu {
+  background: var(--color-surface);
+  border: var(--border-hairline) solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: var(--space-6);
+}
+
+/* ---------- Badge ---------- */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  border: var(--border-hairline) solid transparent;
+  font-size: var(--text-label-md);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-solid);
+  white-space: nowrap;
+}
+
+.badge--positif {
+  background: var(--color-success-surface);
+  border-color: var(--color-success-border);
+  color: var(--color-success);
+}
+
+.badge--netral {
+  background: var(--color-neutral-surface);
+  border-color: var(--color-neutral-border);
+  color: var(--color-text-soft);
+}
+
+.badge--bahaya {
+  background: var(--color-danger-surface);
+  border-color: var(--color-danger-border);
+  color: var(--color-danger);
+}
+
+.badge--peringatan {
+  background: var(--color-warning-surface);
+  border-color: var(--color-warning-border);
+  color: var(--color-warning-text);
+}
+
+.badge--chip {
+  background: var(--color-surface-muted);
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+}
+
+/* ---------- Spinner ---------- */
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-border-strong);
+  border-top-color: transparent;
+  border-radius: var(--radius-pill);
+  animation: spinner-putar 700ms linear infinite;
+}
+
+@keyframes spinner-putar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+/* ---------- Toast ---------- */
+
+.toast-wadah {
+  position: fixed;
+  right: var(--space-6);
+  bottom: var(--space-6);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 280px;
+  max-width: 420px;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  border: var(--border-hairline) solid var(--color-border);
+  background: var(--color-surface);
+  font-size: var(--text-body-sm);
+}
+
+.toast--sukses {
+  background: var(--color-success-surface);
+  border-color: var(--color-success-border);
+  color: var(--color-success);
+}
+
+.toast--gagal {
+  background: var(--color-danger-surface);
+  border-color: var(--color-danger-border);
+  color: var(--color-danger);
+}
+
+/* ---------- Modal ---------- */
+
+.modal-latar {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: rgb(0 0 0 / 45%);
+}
+
+.modal {
+  width: 100%;
+  max-width: 440px;
+  background: var(--color-surface);
+  border-radius: var(--radius-card);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.modal__judul {
+  margin: 0;
+  font-size: var(--text-heading-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.modal__aksi {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+/* ---------- Stepper (Brief §3.4) ---------- */
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stepper__langkah {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.stepper__penanda {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: var(--radius-pill);
+  border: var(--border-hairline) solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: var(--text-label-md);
+  font-weight: var(--weight-semibold);
+}
+
+.stepper__label {
+  font-size: var(--text-label-md);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.stepper__langkah--aktif .stepper__penanda {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.stepper__langkah--aktif .stepper__label {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+}
+
+.stepper__langkah--selesai .stepper__penanda {
+  background: var(--color-success-surface);
+  border-color: var(--color-success-border);
+  color: var(--color-success);
+}
+
+.stepper__langkah--selesai .stepper__label {
+  color: var(--color-text);
+}
+
+.stepper__garis {
+  flex: 1;
+  min-width: 40px;
+  height: 1px;
+  background: var(--color-border);
+}
+
+
+/* ---------- Utilitas komponen ---------- */
+
+.kartu__judul {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-heading-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-heading);
+}
+
+.kartu__catatan {
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-body-sm);
+}
+
+.tautan {
+  color: var(--color-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.tautan:hover {
+  color: var(--color-text-muted);
+}
+
+.tombol--lebar {
+  width: 100%;
+}
+
+/* Tombol nonaktif yang tetap terbaca (Brief §3.4 "Tombol nonaktif"). */
+[aria-disabled='true'].tombol {
+  background: var(--color-surface-muted);
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+/* ---------- Katalog: grid dan kartu UKM (Brief §5 M-01) ---------- */
+
+.katalog-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-6);
+}
+
+.kartu-ukm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-hairline) solid var(--color-border);
+  border-radius: var(--radius-card);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.kartu-ukm:hover {
+  border-color: var(--color-border-strong);
+}
+
+.kartu-ukm__atas {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.kartu-ukm__ikon,
+.detail__ikon,
+.persyaratan__ikon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: var(--radius-control);
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.kartu-ukm__ikon {
+  width: 44px;
+  height: 44px;
+}
+
+.kartu-ukm__identitas {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.kartu-ukm__nama {
+  margin: 0;
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.kartu-ukm__lencana,
+.detail__lencana {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.kartu-ukm__deskripsi {
+  margin: 0;
+  font-size: var(--text-body-md);
+  color: var(--color-text-soft);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.kartu-ukm__tutup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--text-body-sm);
+}
+
+.kartu-ukm__aksi {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: auto;
+}
+
+.kartu-ukm__aksi .tombol {
+  flex: 1;
+}
+
+.kartu-ukm__detail {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-body-md);
+  color: var(--color-text-soft);
+  white-space: nowrap;
+}
+
+.kartu-ukm__detail:hover {
+  color: var(--color-text);
+}
+
+/* ---------- Breadcrumb (Brief §3.4) ---------- */
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+}
+
+.breadcrumb a:hover {
+  color: var(--color-text);
+}
+
+/* ---------- Detail UKM (Brief §5 M-02) ---------- */
+
+.detail__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.detail__ikon {
+  width: 64px;
+  height: 64px;
+}
+
+.detail__nama {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-heading-md);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-heading);
+}
+
+.detail__isi {
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 3.5fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.detail__kiri,
+.detail__kanan {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.detail__isi p {
+  margin: 0;
+  color: var(--color-text-soft);
+}
+
+.persyaratan {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.persyaratan__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.persyaratan__ikon {
+  width: 40px;
+  height: 40px;
+}
+
+.persyaratan__teks {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.persyaratan__teks .text-muted {
+  font-size: var(--text-body-sm);
+}
+
+.status__daftar {
+  margin: var(--space-4) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.status__daftar div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.status__daftar dt {
+  font-size: var(--text-body-sm);
+}
+
+.status__daftar dd {
+  margin: 0;
+  font-size: var(--text-body-md);
+  font-weight: var(--weight-medium);
+}
+
+/* ---------- Form pendaftaran (Brief §5 M-03) ---------- */
+
+.form__pita {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-hairline) solid var(--color-border);
+  border-radius: var(--radius-card);
+  margin-bottom: var(--space-6);
+}
+
+.form__ukm {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  flex-wrap: wrap;
+}
+
+.form__ukm-nama {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--weight-semibold);
+}
+
+.form__kunci {
+  margin: 0;
+  font-size: var(--text-body-sm);
+}
+
+.form__stepper {
+  max-width: var(--container-form);
+  margin: 0 auto var(--space-6);
+}
+
+.form__isi {
+  max-width: var(--container-form);
+  margin: 0 auto;
+}
+
+@media (max-width: 1200px) {
+  .katalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .detail__isi {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .katalog-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2s;
+  }
+}
