@@ -85,39 +85,29 @@ export async function kirimOtpPendaftaran(email, password) {
     if (cekPengguna) {
       return {
         berhasil: false,
-        pesan: 'Email ini sudah terdaftar. Silakan langsung masuk.',
+        pesan: 'Email ini sudah terdaftar di sistem. Silakan langsung masuk.',
       }
     }
 
-    // 2. Minta Supabase Auth untuk mengirimkan email OTP
-    const { error } = await supabase.auth.signUp({
+    // 2. Kirim OTP via Supabase Auth (memicu template 'Magic link or OTP' yang dikonfigurasi)
+    const { error: otpError } = await supabase.auth.signInWithOtp({
       email: emailBersih,
-      password: password,
+      options: {
+        shouldCreateUser: true,
+      },
     })
 
-    if (error) {
-      console.warn('Supabase signUp notice:', error.message)
-      if (
-        error.message?.toLowerCase().includes('already registered') ||
-        error.message?.toLowerCase().includes('already exists')
-      ) {
-        const { error: resendError } = await supabase.auth.resend({
-          type: 'signup',
-          email: emailBersih,
-        })
-        if (resendError) {
-          const { error: otpError } = await supabase.auth.signInWithOtp({
-            email: emailBersih,
-          })
-          if (otpError) {
-            return {
-              berhasil: false,
-              pesan: otpError.message || resendError.message || 'Gagal mengirimkan kode OTP.',
-            }
-          }
+    if (otpError) {
+      console.warn('signInWithOtp error, mencoba signUp:', otpError.message)
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: emailBersih,
+        password: password,
+      })
+      if (signUpError) {
+        return {
+          berhasil: false,
+          pesan: signUpError.message || otpError.message || 'Gagal mengirimkan kode OTP ke email Anda.',
         }
-      } else {
-        return { berhasil: false, pesan: error.message || 'Gagal mengirimkan kode OTP ke email Anda.' }
       }
     }
 
@@ -144,31 +134,30 @@ export async function verifikasiOtpDanDaftar(dataMahasiswa, kodeOtp) {
   try {
     const supabase = ambilSupabase()
 
-    // 1. Verifikasi kode OTP ke Supabase Auth
+    // 1. Verifikasi kode OTP ke Supabase Auth (mencoba type 'email' lalu fallback 'signup')
     let authUser = null
-    const { data: verifData, error: verifError } = await supabase.auth.verifyOtp({
+    const { data: fbData, error: fbError } = await supabase.auth.verifyOtp({
       email: emailBersih,
       token: tokenOtp,
-      type: 'signup',
+      type: 'email',
     })
 
-    if (verifError) {
-      // Coba alternatif tipe OTP 'email'
-      const { data: fbData, error: fbError } = await supabase.auth.verifyOtp({
+    if (fbError) {
+      const { data: verifData, error: verifError } = await supabase.auth.verifyOtp({
         email: emailBersih,
         token: tokenOtp,
-        type: 'email',
+        type: 'signup',
       })
 
-      if (fbError) {
+      if (verifError) {
         return {
           berhasil: false,
           pesan: 'Kode OTP tidak valid atau sudah kedaluwarsa. Silakan periksa kembali email Anda.',
         }
       }
-      authUser = fbData?.user
-    } else {
       authUser = verifData?.user
+    } else {
+      authUser = fbData?.user
     }
 
     // 2. Hash kata sandi dengan SHA-512 + Salt email
