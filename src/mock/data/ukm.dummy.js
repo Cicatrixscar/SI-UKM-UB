@@ -11,6 +11,8 @@
  *
  * [USULAN] field `ikon` (Brief §3.4 kartu katalog) dan `emailUKM` (Brief §5 M-02
  *          kartu "Ada pertanyaan?") tidak ada di entitas modul.
+ * [USULAN] field `foto` — desain Hi-Fi memakai foto kegiatan pada kartu katalog
+ *          dan banner detail; file gambar ada di public/img (dari SVG Hi-Fi).
  */
 
 import { createUKM } from '../../models/UKM.js'
@@ -30,6 +32,30 @@ const dasar = {
   statusVerifikasi: 'TERVERIFIKASI',
 }
 
+/**
+ * [USULAN] Timeline pendaftaran 5 tahap (keputusan G3, Brief M-02/M-06).
+ * `mulai`/`selesai` adalah jendela waktu tahap (ISO) untuk menentukan status
+ * tampilan; `tanggal` adalah teks yang ditampilkan.
+ *
+ * Dua varian: UKM dengan pendaftaran DIBUKA (mengikuti tanggal pada desain
+ * Hi-Fi) dan UKM DITUTUP (mengikuti rentang periode mereka).
+ */
+const TIMELINE_DIBUKA = [
+  { tahap: 'Pendaftaran Dibuka', tanggal: '15 Okt 2026', mulai: '2026-10-15T00:00:00+07:00', selesai: '2026-10-30T23:59:00+07:00' },
+  { tahap: 'Ditutup', tanggal: '30 Okt 2026', mulai: '2026-10-30T23:59:00+07:00', selesai: '2026-10-30T23:59:00+07:00' },
+  { tahap: 'Pemeriksaan Berkas', tanggal: '31 Okt–2 Nov', mulai: '2026-10-31T00:00:00+07:00', selesai: '2026-11-02T23:59:00+07:00' },
+  { tahap: 'Seleksi', tanggal: '3–5 Nov 2026', mulai: '2026-11-03T00:00:00+07:00', selesai: '2026-11-05T23:59:00+07:00' },
+  { tahap: 'Pengumuman', tanggal: '7 Nov 2026', mulai: '2026-11-07T00:00:00+07:00', selesai: '2026-11-07T23:59:00+07:00' },
+]
+
+const TIMELINE_DITUTUP = [
+  { tahap: 'Pendaftaran Dibuka', tanggal: '1 Okt 2026', mulai: '2026-10-01T00:00:00+07:00', selesai: '2026-10-20T23:59:00+07:00' },
+  { tahap: 'Ditutup', tanggal: '20 Okt 2026', mulai: '2026-10-20T23:59:00+07:00', selesai: '2026-10-20T23:59:00+07:00' },
+  { tahap: 'Pemeriksaan Berkas', tanggal: '21–23 Okt 2026', mulai: '2026-10-21T00:00:00+07:00', selesai: '2026-10-23T23:59:00+07:00' },
+  { tahap: 'Seleksi', tanggal: '24–25 Okt 2026', mulai: '2026-10-24T00:00:00+07:00', selesai: '2026-10-25T23:59:00+07:00' },
+  { tahap: 'Pengumuman', tanggal: '27 Okt 2026', mulai: '2026-10-27T00:00:00+07:00', selesai: '2026-10-27T23:59:00+07:00' },
+]
+
 /** @type {import('../../models/UKM.js').UKM[]} */
 export const UKM_DUMMY = Object.freeze([
   Object.freeze(
@@ -43,9 +69,19 @@ export const UKM_DUMMY = Object.freeze([
         'UKM Fotografi adalah ruang belajar dan berkarya bagi mahasiswa yang tertarik pada seni visual. Melalui kelas dasar, berburu foto, pameran, dan dokumentasi kegiatan kampus, kamu dapat mengembangkan teknik sekaligus menemukan sudut pandang baru.',
       emailUKM: 'fotografi@ukm.ub.ac.id',
       ikon: 'i-camera',
+      foto: '/img/ukm-fotografi.jpg',
+      // [USULAN] G7 — panel "Langkah Selanjutnya" pada kartu DITERIMA (M-07).
+      langkahSelanjutnya: {
+        kontak: 'Nadia · 0812 3456 7890',
+        grupWA: 'Grup WhatsApp: Fotografi 2026',
+        linkGrupWA: 'https://chat.whatsapp.com/fotografi2026',
+        pertemuan: 'Pertemuan perdana: 24 Oktober 2026',
+        waktuLokasi: '09.00 WIB · Sekretariat UKM Fotografi',
+      },
       statusPendaftaran: STATUS_PENDAFTARAN.DIBUKA,
       ...dasar,
       ...PERIODE_DIBUKA,
+      timeline: TIMELINE_DIBUKA,
     })
   ),
   Object.freeze(
@@ -58,9 +94,11 @@ export const UKM_DUMMY = Object.freeze([
         'UKM Basket mempertemukan mahasiswa yang senang bermain dan menonton bola basket. Latihan rutin, liga internal, dan pertandingan antar-fakultas menjadi ruang untuk melatih fisik, kerja sama tim, dan sportivitas.',
       emailUKM: 'basket@ukm.ub.ac.id',
       ikon: 'i-basketball',
+      foto: '/img/ukm-basket.jpg',
       statusPendaftaran: STATUS_PENDAFTARAN.DIBUKA,
       ...dasar,
       ...PERIODE_DIBUKA,
+      timeline: TIMELINE_DIBUKA,
     })
   ),
   Object.freeze(
@@ -73,9 +111,11 @@ export const UKM_DUMMY = Object.freeze([
         'UKM Paduan Suara melatih vokal, penampilan panggung, dan kekompakan kor. Kegiatan rutin meliputi latihan teknik vokal, rekaman, dan penampilan pada kegiatan universitas serta kompetisi paduan suara nasional.',
       emailUKM: 'paduansuara@ukm.ub.ac.id',
       ikon: 'i-music',
+      foto: '/img/ukm-paduan-suara.jpg',
       statusPendaftaran: STATUS_PENDAFTARAN.DIBUKA,
       ...dasar,
       ...PERIODE_DIBUKA,
+      timeline: TIMELINE_DIBUKA,
     })
   ),
   Object.freeze(
@@ -88,9 +128,11 @@ export const UKM_DUMMY = Object.freeze([
         'UKM Pecinta Alam membawa mahasiswa mengenal alam sekaligus menjaganya. Kegiatan meliputi pelatihan dasar pendakian, ekspedisi, penanaman pohon, dan edukasi konservasi bersama komunitas sekitar kampus.',
       emailUKM: 'pecintaalam@ukm.ub.ac.id',
       ikon: 'i-mountain',
+      foto: '/img/ukm-pecinta-alam.jpg',
       statusPendaftaran: STATUS_PENDAFTARAN.DIBUKA,
       ...dasar,
       ...PERIODE_DIBUKA,
+      timeline: TIMELINE_DIBUKA,
     })
   ),
   Object.freeze(
@@ -104,9 +146,11 @@ export const UKM_DUMMY = Object.freeze([
         'UKM Teater adalah ruang eksplorasi seni pertunjukan bagi mahasiswa. Melalui kelas akting, penulisan naskah, pementasan, dan festival teater kampus, anggota belajar berani tampil dan bercerita.',
       emailUKM: 'teater@ukm.ub.ac.id',
       ikon: 'i-palette',
+      foto: '/img/ukm-teater.jpg',
       statusPendaftaran: STATUS_PENDAFTARAN.DIBUKA,
       ...dasar,
       ...PERIODE_DIBUKA,
+      timeline: TIMELINE_DIBUKA,
     })
   ),
   Object.freeze(
@@ -119,9 +163,11 @@ export const UKM_DUMMY = Object.freeze([
         'UKM Robotika mempertemukan mahasiswa yang gemar merakit dan memprogram. Kegiatan meliputi kelas dasar elektronika, pengembangan prototipe robot, dan persiapan kompetisi robotika nasional maupun internasional.',
       emailUKM: 'robotika@ukm.ub.ac.id',
       ikon: 'i-box',
+      foto: '/img/ukm-robotika.jpg',
       statusPendaftaran: STATUS_PENDAFTARAN.DIBUKA,
       ...dasar,
       ...PERIODE_DIBUKA,
+      timeline: TIMELINE_DIBUKA,
     })
   ),
   Object.freeze(
@@ -134,9 +180,11 @@ export const UKM_DUMMY = Object.freeze([
         'UKM Badminton menghimpun mahasiswa pecinta bulu tangkis. Latihan teknik dasar, sparring antar-divisi, dan turnamen internal menjadi agenda rutin untuk menjaga performa dan sportivitas.',
       emailUKM: 'badminton@ukm.ub.ac.id',
       ikon: 'i-trophy',
+      foto: '/img/ukm-badminton.jpg',
       statusPendaftaran: STATUS_PENDAFTARAN.DITUTUP,
       ...dasar,
       ...PERIODE_DITUTUP,
+      timeline: TIMELINE_DITUTUP,
     })
   ),
   Object.freeze(
@@ -149,9 +197,11 @@ export const UKM_DUMMY = Object.freeze([
         'UKM Debat melatih kemampuan berpikir kritis, menyusun argumen, dan berbicara di depan umum. Anggota berlatih debat parlementer dan bahasa Inggris, serta mengikuti kejuaraan debat antar-kampus.',
       emailUKM: 'debat@ukm.ub.ac.id',
       ikon: 'i-messages-square',
+      foto: '/img/ukm-debat.jpg',
       statusPendaftaran: STATUS_PENDAFTARAN.DITUTUP,
       ...dasar,
       ...PERIODE_DITUTUP,
+      timeline: TIMELINE_DITUTUP,
     })
   ),
 ])

@@ -23,8 +23,8 @@ tambahRute({
   halaman: () => import('./pages/auth/LoginPage.js'),
 })
 
-// Rute menu Mahasiswa (navConfig.js) — Riwayat dan Hasil Seleksi tampil tetapi
-// belum berfungsi pada sprint ini (AI.md §1).
+// Rute menu Mahasiswa (navConfig.js) — Katalog, Riwayat, Hasil Seleksi,
+// dan Notifikasi semuanya berfungsi (lingkup diperluas sesuai permintaan user).
 for (const item of menuMahasiswa) {
   tambahRute({
     jalur: item.jalur,
@@ -34,6 +34,15 @@ for (const item of menuMahasiswa) {
     halaman: item.halaman,
   })
 }
+
+// Detail riwayat pendaftaran — [DOKUMEN] Brief §4.3: `#/mahasiswa/riwayat/:idPendaftaran`
+tambahRute({
+  jalur: '/mahasiswa/riwayat/:idPendaftaran',
+  judul: 'Riwayat Pendaftaran',
+  perluLogin: true,
+  peran: 'MAHASISWA',
+  halaman: () => import('./pages/mahasiswa/RiwayatPendaftaranPage.js'),
+})
 
 // Detail UKM — [DOKUMEN] Brief §4.3: `#/mahasiswa/ukm/:id`.
 tambahRute({

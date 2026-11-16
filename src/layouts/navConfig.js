@@ -3,31 +3,16 @@
  *
  * [DOKUMEN] AI.md §5: "src/layouts/navConfig.js (hanya menu Mahasiswa)".
  * [DOKUMEN] AI.md §11 T1: "navbar Mahasiswa sesuai screenshot `Katalog_UKM.png`
- *           (bagian atas, tanpa sidebar)" dan "Menu Riwayat dan Hasil Seleksi
- *           tampil tetapi belum berfungsi (tautan ke halaman 'Segera hadir')".
- * [DOKUMEN] UI/UX Wireframe Brief §5 M-01 — item navbar.
+ *           (bagian atas, tanpa sidebar)".
+ * [DOKUMEN] UI/UX Wireframe Brief §5 M-01 — item navbar: Katalog UKM, Riwayat
+ *           Pendaftaran, Hasil Seleksi; ditambah Notifikasi sesuai desain Hi-Fi
+ *           (semua layar Hi-Fi masuk lingkup per user).
+ * [DOKUMEN] Brief §4.3 — rute `#/mahasiswa/katalog`, `#/mahasiswa/riwayat`,
+ *           `#/mahasiswa/hasil`, `#/mahasiswa/notifikasi`.
  *
- * [USULAN] Halaman "Segera hadir" dirender inline (bukan file terpisah) karena
- *          daftar file AI.md §5 tidak memuat halaman tersebut.
+ * [USULAN] Halaman "Segera hadir" dihapus: seluruh menu kini berfungsi (Riwayat,
+ *          Hasil Seleksi, Notifikasi dirender halaman asli).
  */
-
-import { PESAN } from '../utils/errors.js'
-
-/** Halaman cadangan untuk menu yang belum berfungsi di sprint ini. */
-function halamanSegeraHadir(namaMenu) {
-  return {
-    render(el) {
-      el.innerHTML = `
-        <section class="halaman kosong">
-          <h1 class="halaman__judul">Segera hadir</h1>
-          <p class="halaman__subjudul">${namaMenu} belum tersedia pada sprint UC003 dan UC004.</p>
-          <p class="halaman__subjudul text-muted">${PESAN.BELUM_ADA_AKTIVITAS}</p>
-          <p><a class="tombol tombol--utama" href="#/mahasiswa/katalog">Kembali ke Katalog UKM</a></p>
-        </section>
-      `
-    },
-  }
-}
 
 /**
  * @typedef {{label: string, jalur: string,
@@ -44,13 +29,16 @@ export const menuMahasiswa = Object.freeze([
   Object.freeze({
     label: 'Riwayat Pendaftaran',
     jalur: '/mahasiswa/riwayat',
-    // [USULAN] di luar lingkup sprint (AI.md §1) — tampil, belum berfungsi.
-    halaman: halamanSegeraHadir('Riwayat Pendaftaran'),
+    halaman: () => import('../pages/mahasiswa/RiwayatPendaftaranPage.js'),
   }),
   Object.freeze({
     label: 'Hasil Seleksi',
     jalur: '/mahasiswa/hasil',
-    // [USULAN] di luar lingkup sprint (AI.md §1) — tampil, belum berfungsi.
-    halaman: halamanSegeraHadir('Hasil Seleksi'),
+    halaman: () => import('../pages/mahasiswa/HasilSeleksiPage.js'),
+  }),
+  Object.freeze({
+    label: 'Notifikasi',
+    jalur: '/mahasiswa/notifikasi',
+    halaman: () => import('../pages/mahasiswa/NotifikasiPage.js'),
   }),
 ])

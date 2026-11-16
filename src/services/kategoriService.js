@@ -16,3 +16,24 @@ import { mockGetDaftarKategori } from '../mock/pendaftaranUKMMock.js'
 export async function getDaftarKategori() {
   return mockGetDaftarKategori()
 }
+
+/**
+ * Controller: KategoriController
+ * [DOKUMEN] KD hal. 1, MP2 §3.4.3 hal. 77.
+ */
+export class KategoriController {
+  static async getDaftarKategori() {
+    return getDaftarKategori()
+  }
+}
+
+/**
+ * Service: KategoriService
+ * [DOKUMEN] PRD v0.3 §7.8.
+ */
+export class KategoriService {
+  static async getDaftarKategori() {
+    return getDaftarKategori()
+  }
+}
+

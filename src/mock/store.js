@@ -16,6 +16,7 @@ import { PENGGUNA_DUMMY } from './data/pengguna.dummy.js'
 import { UKM_DUMMY } from './data/ukm.dummy.js'
 import { KATEGORI_DUMMY } from './data/kategori.dummy.js'
 import { PENDAFTARAN_DUMMY, DOKUMEN_DUMMY } from './data/pendaftaran.dummy.js'
+import { NOTIFIKASI_DUMMY } from './data/notifikasi.dummy.js'
 
 /** Salinan mutabel agar mock aman menambah data. */
 export const store = {
@@ -24,6 +25,8 @@ export const store = {
   kategori: [...KATEGORI_DUMMY],
   pendaftaran: [...PENDAFTARAN_DUMMY],
   dokumen: [...DOKUMEN_DUMMY],
+  // Salinan mutabel per baris: `tandaiDibaca` mengubah `dibaca` (dummy dibekukan).
+  notifikasi: NOTIFIKASI_DUMMY.map(n => ({ ...n })),
 }
 
 /**
@@ -36,5 +39,6 @@ export function resetStore() {
   store.kategori = [...KATEGORI_DUMMY]
   store.pendaftaran = [...PENDAFTARAN_DUMMY]
   store.dokumen = [...DOKUMEN_DUMMY]
+  store.notifikasi = NOTIFIKASI_DUMMY.map(n => ({ ...n }))
   return store
 }

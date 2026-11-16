@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local Hi-Fi comparison artifacts (screenshots/HTML previews)
+public/hifi-preview

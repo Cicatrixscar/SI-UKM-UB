@@ -25,13 +25,7 @@ import { hapusSesi } from '../state/session.js'
 
 /** Factory entitas Pengguna. Atribut sesuai MP2 §3.4.1 hal. 65. */
 export function createPengguna(data) {
-  return {
-    idUser: data.idUser,
-    nama: data.nama,
-    email: data.email,
-    password: data.password ?? 'dummy-password',
-    role: data.role,
-  }
+  return new Pengguna(data)
 }
 
 /**
@@ -40,7 +34,7 @@ export function createPengguna(data) {
  */
 export function login(daftarPengguna, email, pass) {
   if (!email || !pass) return false
-  return daftarPengguna.some(
+  return (daftarPengguna ?? []).some(
     p => p.email.toLowerCase() === String(email).toLowerCase() && p.password === pass
   )
 }
@@ -53,3 +47,65 @@ export function login(daftarPengguna, email, pass) {
 export function logout() {
   hapusSesi()
 }
+
+/**
+ * Kelas: Pengguna (superclass)
+ * [DOKUMEN] KD hal. 1, MP2 §3.4.1 hal. 65, PRD v0.3 §6.1.
+ */
+export class Pengguna {
+  /**
+   * @param {object} data
+   * @param {string} data.idUser
+   * @param {string} data.nama
+   * @param {string} data.email
+   * @param {string} [data.password]
+   * @param {string} data.role
+   */
+  constructor(data = {}) {
+    this.idUser = data.idUser
+    this.nama = data.nama
+    this.email = data.email
+    this.password = data.password ?? 'dummy-password'
+    this.role = data.role
+  }
+
+  /**
+   * Sumber: MP2 §3.4.1 hal. 65 — Pengguna.login(email, pass): boolean
+   * @param {string} email
+   * @param {string} pass
+   * @returns {boolean}
+   */
+  login(email, pass) {
+    if (!email || !pass) return false
+    return (
+      this.email.toLowerCase() === String(email).toLowerCase() &&
+      this.password === pass
+    )
+  }
+
+  /**
+   * Sumber: MP2 §3.4.1 hal. 65 — Pengguna.logout(): void
+   */
+  logout() {
+    logout()
+  }
+
+  /**
+   * Class-level / static helper untuk pencarian di koleksi.
+   * @param {Array<Pengguna>} daftarPengguna
+   * @param {string} email
+   * @param {string} pass
+   * @returns {boolean}
+   */
+  static login(daftarPengguna, email, pass) {
+    return login(daftarPengguna, email, pass)
+  }
+
+  /**
+   * Class-level / static logout.
+   */
+  static logout() {
+    logout()
+  }
+}
+

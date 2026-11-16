@@ -184,7 +184,7 @@ export async function mockSimpanPendaftaran(dataForm, berkas) {
 
   const idPendaftaran = await mockSaveData(dataForm)
   for (const item of berkas ?? []) {
-    await mockSaveDokumen(idPendaftaran, item?.file)
+    await mockSaveDokumen(idPendaftaran, item?.file, item?.kode)
   }
   return { berhasil: true, idPendaftaran, pesan: PESAN.PENDAFTARAN_BERHASIL }
 }
@@ -208,11 +208,13 @@ export async function mockSaveData(dataForm) {
  * Service — `saveDokumen(idPendaftaran, file)` -> boolean.
  * [DOKUMEN] MP2 §3.4.3 hal. 75, §3.3 SD-UC003 pesan 24 (hal. 37), dan entitas
  *           DokumenPendaftaran.saveDokumen (MP2 §3.4.1 hal. 68).
+ * [USULAN] parameter `kodeDokumen` — menghubungkan unggahan dengan
+ *          PersyaratanDokumen.kode untuk layar M-06.
  * @returns {Promise<boolean>}
  */
-export async function mockSaveDokumen(idPendaftaran, file) {
+export async function mockSaveDokumen(idPendaftaran, file, kodeDokumen) {
   await delay(80)
-  return simpanKeStoreDokumen(store.dokumen, idPendaftaran, file)
+  return simpanKeStoreDokumen(store.dokumen, idPendaftaran, file, kodeDokumen)
 }
 
 /**
@@ -223,4 +225,84 @@ export async function mockSaveDokumen(idPendaftaran, file) {
 export async function mockGetDokumenByID(idPendaftaran) {
   await delay(120)
   return getDokumenByID(store.dokumen, idPendaftaran)
+}
+
+/* ===========================================================================
+   Riwayat pendaftaran mahasiswa (layar M-08 dan M-06)
+   =========================================================================== */
+
+/**
+ * Daftar riwayat pendaftaran milik satu mahasiswa, terbaru di atas.
+ * [DOKUMEN] UI/UX Wireframe Brief §5 M-08 — "Daftar kartu pendaftaran milik
+ *           mahasiswa. Setiap kartu: nama UKM, nomor pendaftaran, tanggal
+ *           daftar, badge status pendaftaran, dan tombol 'Lihat Detail'.
+ *           Urutan terbaru di atas."
+ * [DOKUMEN] BUC UC1 post condition — menu Riwayat Pendaftaran.
+ * [USULAN] PRD tidak memuat nama method riwayat; bentuk return menggabungkan
+ *          Pendaftaran + UKM + kategori agar halaman tidak menggabungkan data.
+ * @param {string} idMahasiswa
+ * @returns {Promise<Array<object>>}
+ */
+export async function mockGetRiwayatPendaftaran(idMahasiswa) {
+  await delay()
+  return store.pendaftaran
+    .filter(p => p.idMahasiswa === idMahasiswa)
+    .map(p => {
+      const ukm = findById(store.ukm, p.idUKM)
+      const kategori = store.kategori.find(k => k.idKategori === ukm?.idKategori)
+      return {
+        ...p,
+        namaUKM: ukm?.namaUKM ?? '',
+        ikon: ukm?.ikon ?? 'i-award',
+        foto: ukm?.foto ?? '',
+        emailUKM: ukm?.emailUKM ?? '',
+        namaKategori: kategori?.namaKategori ?? '',
+      }
+    })
+    .sort(
+      (a, b) =>
+        new Date(b.tanggalDaftar).getTime() - new Date(a.tanggalDaftar).getTime()
+    )
+}
+
+/**
+ * Detail satu riwayat pendaftaran (M-06).
+ * [DOKUMEN] UI/UX Wireframe Brief §5 M-06 — kartu "Data Pendaftaran" (nama,
+ *           NIM, email, nomor telepon), kartu "Dokumen Terunggah" (termasuk
+ *           dokumen wajib yang belum tersedia), dan kartu "Hasil Pemeriksaan
+ *           Berkas".
+ * [USULAN] PRD tidak memuat method ini; `dataDiri` diambil dari entitas
+ *          Mahasiswa karena pendaftaran menyimpan referensi `idMahasiswa`.
+ * @param {string} idPendaftaran
+ * @returns {Promise<object|null>}
+ */
+export async function mockGetDetailPendaftaran(idPendaftaran) {
+  await delay()
+  const p = store.pendaftaran.find(x => x.idPendaftaran === idPendaftaran)
+  if (!p) return null
+
+  const ukm = findById(store.ukm, p.idUKM)
+  const kategori = store.kategori.find(k => k.idKategori === ukm?.idKategori)
+  const pengguna = store.pengguna.find(u => u.idUser === p.idMahasiswa)
+
+  return {
+    ...p,
+    namaUKM: ukm?.namaUKM ?? '',
+    ikon: ukm?.ikon ?? 'i-award',
+    foto: ukm?.foto ?? '',
+    emailUKM: ukm?.emailUKM ?? '',
+    statusPendaftaranUKM: ukm?.statusPendaftaran ?? '',
+    namaKategori: kategori?.namaKategori ?? '',
+    // Urut sesuai persyaratan; dokumen yang belum diunggah tidak ada di store.
+    persyaratanDokumen: persyaratanWajib(PERSYARATAN_DOKUMEN_DUMMY),
+    dokumen: getDokumenByID(store.dokumen, idPendaftaran).map(d => ({ ...d })),
+    dataDiri: pengguna
+      ? {
+          nama: pengguna.nama ?? '',
+          nim: pengguna.nim ?? '',
+          email: pengguna.email ?? '',
+          nomorTelepon: pengguna.nomorTelepon ?? '',
+        }
+      : null,
+  }
 }

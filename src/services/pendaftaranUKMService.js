@@ -37,6 +37,8 @@ import {
   mockSimpanPendaftaran,
   mockSaveData,
   mockSaveDokumen,
+  mockGetRiwayatPendaftaran,
+  mockGetDetailPendaftaran,
 } from '../mock/pendaftaranUKMMock.js'
 
 /**
@@ -129,8 +131,102 @@ export async function saveData(dataForm) {
  * Service — `saveDokumen(idPendaftaran, file)`.
  * [DOKUMEN] MP2 §3.4.3 hal. 75, §3.3 SD-UC003 pesan 24 (hal. 37), dan entitas
  *           DokumenPendaftaran.saveDokumen (MP2 §3.4.1 hal. 68).
+ * [USULAN] parameter `kodeDokumen` (lihat models/DokumenPendaftaran.js).
  * @returns {Promise<boolean>}
  */
-export async function saveDokumen(idPendaftaran, file) {
-  return mockSaveDokumen(idPendaftaran, file)
+export async function saveDokumen(idPendaftaran, file, kodeDokumen) {
+  return mockSaveDokumen(idPendaftaran, file, kodeDokumen)
 }
+
+/**
+ * Riwayat pendaftaran milik mahasiswa (menu "Riwayat Pendaftaran", M-08).
+ * [DOKUMEN] UI/UX Wireframe Brief §5 M-08 dan BUC UC1 post condition.
+ * [DOKUMEN] AI.md §4 — halaman hanya memanggil `services/`.
+ * [USULAN] PRD tidak memuat nama method riwayat (Brief G11: layar M-08 baru).
+ * @param {string} idMahasiswa
+ * @returns {Promise<Array<object>>}
+ */
+export async function getRiwayatPendaftaran(idMahasiswa) {
+  return mockGetRiwayatPendaftaran(idMahasiswa)
+}
+
+/**
+ * Detail satu riwayat pendaftaran (M-06).
+ * [DOKUMEN] UI/UX Wireframe Brief §5 M-06 — route `#/mahasiswa/riwayat/:idPendaftaran`.
+ * [USULAN] PRD tidak memuat method ini (Brief G11).
+ * @param {string} idPendaftaran
+ * @returns {Promise<object|null>}
+ */
+export async function getDetailPendaftaran(idPendaftaran) {
+  return mockGetDetailPendaftaran(idPendaftaran)
+}
+
+/**
+ * Controller: PendaftaranUKMController
+ * [DOKUMEN] KD hal. 1, MP2 §3.4.3 hal. 74-75, PRD v0.3 §7.2.
+ */
+export class PendaftaranUKMController {
+  static async getKatalogUKM() {
+    return getKatalogUKM()
+  }
+
+  static async getDetailUKM(idUKM) {
+    return getDetailUKM(idUKM)
+  }
+
+  static async validasiDokumen(file, dokumen) {
+    return validasiDokumen(dokumen ?? file)
+  }
+
+  static async submitPendaftaran(dataForm, berkas) {
+    return submitPendaftaran(dataForm, berkas)
+  }
+
+  /**
+   * Alias: buatPendaftaran(dataForm, berkas)
+   * Sesuai label pesan di Sequence Diagram 1
+   */
+  static async buatPendaftaran(dataForm, berkas) {
+    return submitPendaftaran(dataForm, berkas)
+  }
+}
+
+/**
+ * Alias fungsi buatPendaftaran sesuai label pesan di Sequence Diagram 1
+ */
+export const buatPendaftaran = submitPendaftaran
+
+/**
+ * Service: PendaftaranUKMService
+ * [DOKUMEN] MP2 §3.4.3 hal. 75, PRD v0.3 §7.2.
+ */
+export class PendaftaranUKMService {
+  static async getUKMdibuka() {
+    return getUKMdibuka()
+  }
+
+  static async getDetailUKM(idUKM) {
+    return getDetailUKM(idUKM)
+  }
+
+  static async validasiDokumen(file, dokumen) {
+    return validasiDokumen(dokumen ?? file)
+  }
+
+  static async validasiSemuaBerkas(berkas) {
+    return validasiSemuaBerkas(berkas)
+  }
+
+  static async simpanPendaftaran(dataForm, berkas) {
+    return simpanPendaftaran(dataForm, berkas)
+  }
+
+  static async saveData(dataForm) {
+    return saveData(dataForm)
+  }
+
+  static async saveDokumen(idPendaftaran, file, kodeDokumen) {
+    return saveDokumen(idPendaftaran, file, kodeDokumen)
+  }
+}
+

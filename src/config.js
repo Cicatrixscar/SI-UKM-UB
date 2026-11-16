@@ -24,6 +24,22 @@ export const config = {
   batasKarakterAlasan: 500,
 
   /**
+   * Waktu acuan ("jam demo") untuk hitung mundur pendaftaran, sisa waktu,
+   * dan jarak waktu notifikasi.
+   *
+   * [USULAN] PRD tidak memuat jam demo. Data dummy pendaftaran bersifat statis
+   *          (rentang 15-30 Oktober 2026, keputusan G501), sehingga memakai
+   *          `new Date()` membuat countdown "Tutup dalam 5 hari 3 jam" pada
+   *          desain Hi-Fi tidak akan pernah cocok. Nilai dipilih agar selisih
+   *          ke `tanggalTutup` UKM DIBUKA (2026-10-30T23:59+07:00) tepat
+   *          "5 hari 3 jam".
+   *
+   * Catatan: tes memakai fake timer `2026-10-26T10:00:00+07:00`; jam demo tidak
+   *          dipakai di logika yang diuji tes, sehingga tes tidak terpengaruh.
+   */
+  tanggalDemo: '2026-10-25T20:59:00+07:00',
+
+  /**
    * Paksa mock submit gagal.
    * [DOKUMEN] AI.md §10 DoD: "Tombol Retry muncul dan berfungsi saat mock dipaksa
    *           gagal."
@@ -38,5 +54,6 @@ export const batasUkuranFile = config.batasUkuranFile
 export const formatFileDiizinkan = config.formatFileDiizinkan
 export const formatFileLabel = config.formatFileLabel
 export const batasKarakterAlasan = config.batasKarakterAlasan
+export const tanggalDemo = config.tanggalDemo
 export const namaAplikasi = config.namaAplikasi
 export const institusi = config.institusi

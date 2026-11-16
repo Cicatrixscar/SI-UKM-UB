@@ -8,60 +8,61 @@
 :root {
   color-scheme: light;
 
-  /* --- warna inti --- */
-  --color-primary: #3a3a3a;
-  --color-primary-hover: #2b2b2b;
-  --color-primary-active: #1f1f1f;
+  /* --- warna inti (palet desain Hi-Fi: navy #003153) --- */
+  --color-primary: #003153;
+  --color-primary-hover: #00263f;
+  --color-primary-active: #001c30;
   --color-secondary: #ffffff;
-  --color-accent: #0007cb;
+  --color-accent: #003153;
   --color-on-primary: #ffffff;
-  --color-on-secondary: #111111;
+  --color-on-secondary: #182b3a;
 
   /* --- permukaan --- */
-  --color-canvas: #f6f6f6;
+  --color-canvas: #f3f5f8;
   --color-surface: #ffffff;
-  --color-surface-muted: #f2f2f2;
-  --color-surface-warm: #f4f3ec;
-  --color-surface-raised: #ecebe9;
+  --color-surface-muted: #f3f5f8;
+  --color-surface-warm: #eef2f7;
+  --color-surface-raised: #e8eef4;
 
   /* --- teks --- */
-  --color-text: #1f1f1f;
-  --color-text-soft: #43433f;
-  --color-text-muted: #6b6b6b;
+  --color-text: #182b3a;
+  --color-text-soft: #3d4c5a;
+  --color-text-muted: #5f6e7a;
 
   /* --- garis & fokus --- */
-  --color-border: #e4e4e4;
-  --color-border-strong: #8a8a86;
-  --color-nav-hover: #0000000f;
-  --color-focus-ring: #1f1f1f;
+  --color-border: #dfe5ec;
+  --color-border-strong: #c3cdd9;
+  --color-border-soft: #e8eef4;
+  --color-nav-hover: #0031530f;
+  --color-focus-ring: #003153;
 
   /* --- status (isi) --- */
-  --color-positive: #37b54a;
-  --color-on-positive: #111111;
-  --color-warning: #9a6700;
-  --color-on-warning: #111111;
-  --color-danger: #b42318;
+  --color-positive: #237446;
+  --color-on-positive: #ffffff;
+  --color-warning: #9b641c;
+  --color-on-warning: #ffffff;
+  --color-danger: #b43d38;
   --color-on-danger: #ffffff;
 
   /* --- pasangan latar muda + teks (dipakai badge & banner) --- */
-  --color-success: #1e7b4a;
-  --color-success-surface: #e7f4ec;
-  --color-success-border: #b9ddc7;
+  --color-success: #237446;
+  --color-success-surface: #edf6ef;
+  --color-success-border: #c6e3d0;
   --color-on-success: #ffffff;
-  --color-danger-hover: #912019;
-  --color-danger-surface: #fdecea;
-  --color-danger-border: #f3c4bf;
-  --color-warning-surface: #fcf4e0;
-  --color-warning-border: #eed9a6;
+  --color-danger-hover: #98332e;
+  --color-danger-surface: #fcefed;
+  --color-danger-border: #f2d3d0;
+  --color-warning-surface: #fdf3e6;
+  --color-warning-border: #f0dcbe;
   --color-neutral-surface: #efefef;
-  --color-neutral-border: #dcdcd9;
-  --color-info: #1d4ed8;
-  --color-info-surface: #edf3fe;
-  --color-info-border: #c4d7f7;
+  --color-neutral-border: #dedede;
+  --color-info: #3568a2;
+  --color-info-surface: #eaf1f9;
+  --color-info-border: #ccdcf0;
 
   /* --- teks status (kontras 4.5:1 di canvas/surface) --- */
-  --color-positive-text: #0f882b;
-  --color-warning-text: #956f12;
+  --color-positive-text: #1c5f39;
+  --color-warning-text: #8a5817;
 
   /* --- palet laporan (hanya untuk seri grafik berlabel) --- */
   --color-report-lime: #cbff20;
@@ -82,8 +83,8 @@
 
   --weight-regular: 400;
   --weight-medium: 500;
-  --weight-semibold: 500;
-  --weight-bold: 600;
+  --weight-semibold: 600;
+  --weight-bold: 700;
 
   --text-label-sm: 12px;
   --text-label-md: 14px;
@@ -126,25 +127,27 @@
   --space-2: var(--spacing-8);
   --space-3: var(--spacing-12);
   --space-4: var(--spacing-16);
+  /* [USULAN] langkah di antara 16px dan 24px — dipakai baris notifikasi. */
+  --space-5: 20px;
   --space-6: var(--spacing-24);
   --space-8: var(--spacing-32);
   --space-12: var(--spacing-80);
 
-  --container-page: 1560px;
+  --container-page: 1728px;
   --container-form: 960px;
   --section-gap: var(--spacing-80);
 
-  /* --- bentuk --- */
-  --radius-control: 8px;
-  --radius-card: 12px;
-  --radius-panel: 12px;
+  /* --- bentuk (desain Hi-Fi: kartu radius besar ~16px) --- */
+  --radius-control: 10px;
+  --radius-card: 16px;
+  --radius-panel: 16px;
   --radius-pill: 9999px;
   --border-hairline: 1px;
 
-  /* prototipe & DESIGN.md: tidak ada bayangan */
-  --shadow-sm: none;
-  --shadow-md: none;
-  --shadow-lg: none;
+  /* Hi-Fi memakai kartu putih datar; bayangan sangat halus opsional. */
+  --shadow-sm: 0 1px 2px rgb(0 49 83 / 4%);
+  --shadow-md: 0 6px 20px rgb(0 49 83 / 6%);
+  --shadow-lg: 0 16px 40px rgb(0 49 83 / 10%);
 
   --disabled-opacity: 0.35;
 

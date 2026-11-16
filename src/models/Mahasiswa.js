@@ -9,7 +9,7 @@
  * Sumber: PRD v0.3 §6.2.
  */
 
-import { createPengguna } from './Pengguna.js'
+import { Pengguna, createPengguna } from './Pengguna.js'
 
 /**
  * @typedef {object} Mahasiswa
@@ -26,13 +26,7 @@ import { createPengguna } from './Pengguna.js'
 
 /** Factory entitas Mahasiswa. Atribut sesuai MP2 §3.4.1 hal. 65-66. */
 export function createMahasiswa(data) {
-  return {
-    ...createPengguna(data),
-    nim: data.nim,
-    nomorTelepon: data.nomorTelepon ?? '',
-    programStudi: data.programStudi ?? '',
-    fakultas: data.fakultas ?? '',
-  }
+  return new Mahasiswa(data)
 }
 
 /**
@@ -55,3 +49,57 @@ export function updateProfil(mahasiswa, dataBaru) {
   }
   return true
 }
+
+/**
+ * Kelas: Mahasiswa (extends Pengguna)
+ * [DOKUMEN] KD hal. 1, MP2 §3.4.1 hal. 65-66, PRD v0.3 §6.2.
+ */
+export class Mahasiswa extends Pengguna {
+  /**
+   * @param {object} data
+   */
+  constructor(data = {}) {
+    super(data)
+    this.nim = data.nim
+    this.nomorTelepon = data.nomorTelepon ?? ''
+    this.programStudi = data.programStudi ?? ''
+    this.fakultas = data.fakultas ?? ''
+  }
+
+  /**
+   * Sumber: MP2 §3.4.1 hal. 66 — Mahasiswa.getDetailMahasiswa(): Mahasiswa
+   * @returns {Mahasiswa}
+   */
+  getDetailMahasiswa() {
+    return { ...this }
+  }
+
+  /**
+   * Sumber: MP2 §3.4.1 hal. 66 — Mahasiswa.updateProfil(dataBaru: Object): boolean
+   * @param {object} dataBaru
+   * @returns {boolean}
+   */
+  updateProfil(dataBaru) {
+    return updateProfil(this, dataBaru)
+  }
+
+  /**
+   * Class-level helper.
+   * @param {Mahasiswa} mahasiswa
+   * @returns {Mahasiswa|null}
+   */
+  static getDetailMahasiswa(mahasiswa) {
+    return getDetailMahasiswa(mahasiswa)
+  }
+
+  /**
+   * Class-level helper.
+   * @param {Mahasiswa} mahasiswa
+   * @param {object} dataBaru
+   * @returns {boolean}
+   */
+  static updateProfil(mahasiswa, dataBaru) {
+    return updateProfil(mahasiswa, dataBaru)
+  }
+}
+

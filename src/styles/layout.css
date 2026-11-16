@@ -36,7 +36,7 @@ code {
   border-radius: var(--radius-control);
 }
 
-/* ---------- Navbar ---------- */
+/* ---------- Navbar (desain Hi-Fi: tinggi 80px, border bawah tipis) ---------- */
 
 .nav {
   position: sticky;
@@ -49,7 +49,8 @@ code {
 .nav__wadah {
   max-width: var(--container-page);
   margin: 0 auto;
-  padding: var(--space-3) var(--space-6);
+  padding: var(--space-4) var(--space-6);
+  min-height: 80px;
   display: flex;
   align-items: center;
   gap: var(--space-6);
@@ -58,7 +59,15 @@ code {
 .nav__merek {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.nav__logo {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  object-fit: cover;
   flex-shrink: 0;
 }
 
@@ -69,9 +78,10 @@ code {
 }
 
 .nav__nama-aplikasi {
-  font-size: var(--text-body-md);
+  font-size: var(--text-body-lg);
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-heading);
+  color: var(--color-text);
 }
 
 .nav__role {
@@ -88,18 +98,18 @@ code {
 
 .nav__tautan {
   position: relative;
-  padding: var(--space-2) 0;
+  padding: var(--space-3) 0;
   font-size: var(--text-body-md);
-  color: var(--color-text-muted);
+  color: var(--color-text-soft);
   transition: color var(--duration-fast) var(--ease-standard);
 }
 
 .nav__tautan:hover {
-  color: var(--color-text);
+  color: var(--color-primary);
 }
 
 .nav__tautan--aktif {
-  color: var(--color-text);
+  color: var(--color-primary);
   font-weight: var(--weight-semibold);
 }
 
@@ -108,8 +118,9 @@ code {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -2px;
-  height: 2px;
+  bottom: -8px;
+  height: 3px;
+  border-radius: var(--radius-pill);
   background: var(--color-primary);
 }
 
@@ -125,30 +136,33 @@ code {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border: 0;
-  border-radius: var(--radius-control);
-  background: transparent;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-raised);
+  color: var(--color-text-soft);
 }
 
 .nav__ikon-tombol:hover {
-  background: var(--color-nav-hover);
+  background: var(--color-border);
+  color: var(--color-primary);
 }
 
 .nav__lencana {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
+  top: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: 2px solid var(--color-surface);
   border-radius: var(--radius-pill);
   background: var(--color-primary);
   color: var(--color-on-primary);
   font-size: 11px;
   font-weight: var(--weight-semibold);
-  line-height: 18px;
+  line-height: 16px;
   text-align: center;
 }
 
@@ -162,11 +176,11 @@ code {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-pill);
   background: var(--color-surface-raised);
-  color: var(--color-text);
+  color: var(--color-primary);
   font-size: var(--text-label-md);
   font-weight: var(--weight-semibold);
 }
@@ -174,6 +188,7 @@ code {
 .nav__nama {
   font-size: var(--text-body-md);
   font-weight: var(--weight-medium);
+  color: var(--color-text);
 }
 
 .nav__keluar {
@@ -252,6 +267,12 @@ code {
   font-size: var(--text-heading-md);
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-heading);
+}
+
+.masuk__logo {
+  width: auto;
+  height: 64px;
+  object-fit: contain;
 }
 
 .masuk__subjudul {

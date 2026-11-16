@@ -28,7 +28,7 @@ import {
 let sedangProses = false
 
 function logo() {
-  return `<svg class="ikon ikon--logo-besar" aria-hidden="true"><use href="#i-graduation-cap"></use></svg>`
+  return `<img class="masuk__logo" src="/img/logo-ub.png" alt="Logo Universitas Brawijaya" />`
 }
 
 function renderIsi(wadah) {
@@ -42,7 +42,7 @@ function renderIsi(wadah) {
         <form class="masuk__form" novalidate data-form></form>
 
         <p class="masuk__pembatas text-muted">atau</p>
-        <button class="tombol tombol--cadangan" type="button" data-cepat>Masuk sebagai Mahasiswa</button>
+        <button class="tombol tombol--cadangan tombol--blok" type="button" data-cepat>Masuk sebagai Mahasiswa</button>
       </div>
     </section>
   `

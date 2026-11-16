@@ -27,12 +27,7 @@ export const KODE_DOKUMEN = Object.freeze({
 
 /** Factory entitas PersyaratanDokumen [USULAN] — AI.md §3 (K2). */
 export function createPersyaratanDokumen(data) {
-  return {
-    kode: data.kode,
-    nama: data.nama,
-    deskripsi: data.deskripsi ?? '',
-    wajib: Boolean(data.wajib),
-  }
+  return new PersyaratanDokumen(data)
 }
 
 /**
@@ -41,5 +36,28 @@ export function createPersyaratanDokumen(data) {
  *          "Ketiga dokumen wajib (KTM, Transkrip, CV) harus valid").
  */
 export function persyaratanWajib(daftarPersyaratan) {
-  return daftarPersyaratan.filter(p => p.wajib)
+  return (daftarPersyaratan ?? []).filter(p => p.wajib)
 }
+
+/**
+ * Kelas: PersyaratanDokumen [USULAN]
+ */
+export class PersyaratanDokumen {
+  /**
+   * @param {object} data
+   */
+  constructor(data = {}) {
+    this.kode = data.kode
+    this.nama = data.nama
+    this.deskripsi = data.deskripsi ?? ''
+    this.wajib = Boolean(data.wajib)
+  }
+
+  /**
+   * Static method: persyaratanWajib(daftarPersyaratan)
+   */
+  static persyaratanWajib(daftarPersyaratan) {
+    return persyaratanWajib(daftarPersyaratan)
+  }
+}
+

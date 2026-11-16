@@ -32,3 +32,22 @@ export async function loginSebagaiMahasiswa() {
 
 /** [DOKUMEN] AI.md §4 — config dipakai pihak service, bukan halaman. */
 export const authServiceConfig = config
+
+/**
+ * Service: AuthService
+ * [DOKUMEN] PRD v0.3 §7.1.
+ */
+export class AuthService {
+  static async login(email, pass) {
+    return login(email, pass)
+  }
+
+  static async logout() {
+    return logout()
+  }
+
+  static async loginSebagaiMahasiswa() {
+    return loginSebagaiMahasiswa()
+  }
+}
+

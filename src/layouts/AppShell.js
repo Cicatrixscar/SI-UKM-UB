@@ -8,20 +8,18 @@
  *           menu tengah, ikon notifikasi dengan badge, avatar inisial + nama +
  *           chevron.
  * [DOKUMEN] UI/UX Wireframe Brief §3.4 — avatar memakai inisial dari nama (G17).
+ * [DOKUMEN] Desain Hi-Fi: logo gambar UB, menu termasuk Notifikasi, lonceng
+ *           bundar dengan badge jumlah belum dibaca, avatar bulat.
  *
  * [USULAN] API `pasang(el, { aktif })` yang mengembalikan elemen konten tidak
  *          ada di PRD; dipilih agar halaman mengisi konten sendiri (termasuk
- *          state loading/kosong/error/suai sesuai AI.md §4).
+ *          state loading/kosong/error/sukses sesuai AI.md §4).
  */
 
 import { config } from '../config.js'
 import { getSesi, hapusSesi } from '../state/session.js'
 import { menuMahasiswa } from './navConfig.js'
 import { inisialDariNama } from '../utils/format.js'
-
-function ikonAplikasi() {
-  return `<svg class="ikon ikon--logo" aria-hidden="true"><use href="#i-graduation-cap"></use></svg>`
-}
 
 function butirMenu(item, jalurSaatIni) {
   const aktif = jalurSaatIni === item.jalur ? ' aria-current="page"' : ''
@@ -43,7 +41,7 @@ export function pasang(el, opsi = {}) {
     <header class="nav">
       <div class="nav__wadah">
         <a class="nav__merek" href="#/mahasiswa/katalog">
-          ${ikonAplikasi()}
+          <img class="nav__logo" src="/img/logo-ub.png" alt="" aria-hidden="true" width="44" height="44" />
           <span class="nav__merek-teks">
             <span class="nav__nama-aplikasi">${config.namaAplikasi}</span>
             <span class="nav__role">Mahasiswa</span>
@@ -55,10 +53,10 @@ export function pasang(el, opsi = {}) {
         </nav>
 
         <div class="nav__aksi">
-          <button class="nav__ikon-tombol" type="button" aria-label="Notifikasi" data-notifikasi>
+          <a class="nav__ikon-tombol" href="#/mahasiswa/notifikasi" aria-label="Notifikasi" data-notifikasi>
             <svg class="ikon" aria-hidden="true"><use href="#i-bell"></use></svg>
-            <span class="nav__lencana" aria-hidden="true">2</span>
-          </button>
+            <span class="nav__lencana" aria-hidden="true" data-lencana-notifikasi hidden>0</span>
+          </a>
           <div class="nav__pengguna">
             <span class="nav__avatar" aria-hidden="true">${inisialDariNama(nama)}</span>
             <span class="nav__nama">${nama}</span>
@@ -76,6 +74,23 @@ export function pasang(el, opsi = {}) {
     hapusSesi()
     location.hash = '#/'
   })
+
+  // Lencana lonceng = jumlah notifikasi belum dibaca (Hi-Fi: badge "2").
+  // [USULAN] diambil dari service (bukan mock) agar AppShell tetap lapisan UI.
+  if (sesi) {
+    import('../services/notifikasiService.js')
+      .then(m => m.getNotifikasiSaya(sesi.idUser))
+      .then(daftar => {
+        const belum = daftar.filter(n => !n.dibaca).length
+        const lencana = el.querySelector('[data-lencana-notifikasi]')
+        if (!lencana) return
+        lencana.hidden = belum === 0
+        lencana.textContent = String(belum)
+      })
+      .catch(() => {
+        /* lencana disembunyikan bila service gagal; halaman tetap berfungsi */
+      })
+  }
 
   return el.querySelector('#konten')
 }

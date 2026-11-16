@@ -11,6 +11,9 @@
  * Sumber: PRD v0.3 §6.6.
  * [USULAN] field `tanggalUnggah` — dibutuhkan layar M-06 (UIX §5) untuk
  *          menampilkan tanggal unggah; tidak ada di modul.
+ * [USULAN] field `kodeDokumen` — penghubung ke `PersyaratanDokumen.kode`
+ *          (KTM/TRANSKRIP/CV) agar M-06 bisa menampilkan dokumen wajib yang
+ *          belum tersedia; tidak ada di modul.
  */
 
 import { validasiFormatBerkas, validasiUkuranBerkas } from '../utils/validators.js'
@@ -26,20 +29,12 @@ let penghitungId = 0
  * @property {string} fileUrl
  * @property {number} ukuranFile   byte
  * @property {string} tanggalUnggah ISO 8601 [USULAN]
+ * @property {string} [kodeDokumen] Kode persyaratan [USULAN]
  */
 
 /** Factory entitas DokumenPendaftaran. Atribut sesuai MP2 §3.4.1 hal. 68. */
 export function createDokumenPendaftaran(data) {
-  return {
-    idDokumen: data.idDokumen,
-    idPendaftaran: data.idPendaftaran,
-    namaFile: data.namaFile,
-    tipeDokumen: data.tipeDokumen,
-    fileUrl: data.fileUrl ?? '',
-    ukuranFile: data.ukuranFile,
-    // [USULAN] PRD tidak memuat field ini; dibutuhkan UIX §5 M-06.
-    tanggalUnggah: data.tanggalUnggah ?? new Date().toISOString(),
-  }
+  return new DokumenPendaftaran(data)
 }
 
 /**
@@ -59,7 +54,7 @@ export function cekFormatDanUkuran(file) {
  * [USULAN] parameter `daftarDokumen` karena method pada modul bersifat class-level.
  * [USULAN] `fileUrl` diisi dari URL objek lokal (mock, tanpa backend).
  */
-export function saveDokumen(daftarDokumen, idPendaftaran, file) {
+export function saveDokumen(daftarDokumen, idPendaftaran, file, kodeDokumen) {
   if (!idPendaftaran || !file) return false
   if (!cekFormatDanUkuran(file)) return false
   penghitungId += 1
@@ -72,6 +67,7 @@ export function saveDokumen(daftarDokumen, idPendaftaran, file) {
       fileUrl: typeof URL !== 'undefined' && file instanceof File ? URL.createObjectURL(file) : '',
       ukuranFile: file.size,
       tanggalUnggah: new Date().toISOString(),
+      kodeDokumen,
     })
   )
   return true
@@ -84,5 +80,60 @@ export function saveDokumen(daftarDokumen, idPendaftaran, file) {
  * [USULAN] parameter `daftarDokumen` karena method pada modul bersifat class-level.
  */
 export function getDokumenByID(daftarDokumen, idPendaftaran) {
-  return daftarDokumen.filter(d => d.idPendaftaran === idPendaftaran)
+  return (daftarDokumen ?? []).filter(d => d.idPendaftaran === idPendaftaran)
 }
+
+/**
+ * Kelas: DokumenPendaftaran
+ * [DOKUMEN] KD hal. 1, MP2 §3.4.1 hal. 68, PRD v0.3 §6.6.
+ */
+export class DokumenPendaftaran {
+  /**
+   * @param {object} data
+   */
+  constructor(data = {}) {
+    this.idDokumen = data.idDokumen
+    this.idPendaftaran = data.idPendaftaran
+    this.namaFile = data.namaFile
+    this.tipeDokumen = data.tipeDokumen
+    this.fileUrl = data.fileUrl ?? ''
+    this.ukuranFile = data.ukuranFile
+    // [USULAN] PRD tidak memuat field ini; dibutuhkan UIX §5 M-06.
+    this.tanggalUnggah = data.tanggalUnggah ?? new Date().toISOString()
+    // [USULAN] penghubung ke PersyaratanDokumen.kode (M-06).
+    this.kodeDokumen = data.kodeDokumen ?? ''
+  }
+
+  /**
+   * Instance method: cekFormatDanUkuran(file)
+   * @param {File|object} [file]
+   * @returns {boolean}
+   */
+  cekFormatDanUkuran(file) {
+    return cekFormatDanUkuran(file ?? { type: this.tipeDokumen, size: this.ukuranFile })
+  }
+
+  /**
+   * Static method: cekFormatDanUkuran(file)
+   * @param {File|object} file
+   * @returns {boolean}
+   */
+  static cekFormatDanUkuran(file) {
+    return cekFormatDanUkuran(file)
+  }
+
+  /**
+   * Static method: saveDokumen(daftarDokumen, idPendaftaran, file)
+   */
+  static saveDokumen(daftarDokumen, idPendaftaran, file, kodeDokumen) {
+    return saveDokumen(daftarDokumen, idPendaftaran, file, kodeDokumen)
+  }
+
+  /**
+   * Static method: getDokumenByID(daftarDokumen, idPendaftaran)
+   */
+  static getDokumenByID(daftarDokumen, idPendaftaran) {
+    return getDokumenByID(daftarDokumen, idPendaftaran)
+  }
+}
+
