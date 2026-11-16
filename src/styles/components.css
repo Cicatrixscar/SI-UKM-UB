@@ -513,7 +513,7 @@
 }
 
 .kartu__catatan {
-  margin: var(--space-4) 0 0;
+  margin: var(--space-6) 0 0;
   font-size: var(--text-body-sm);
 }
 
@@ -706,6 +706,19 @@
 .detail__isi p {
   margin: 0;
   color: var(--color-text-soft);
+}
+
+/*
+ * `.detail__isi p` di atas mematikan margin semua paragraf, termasuk catatan
+ * dan label timeline. Kembalikan jarak vertikalnya di sini (spesifisitas lebih
+ * tinggi) agar tidak lagi menempel ke isi di atasnya.
+ */
+.detail__isi .kartu__catatan {
+  margin: var(--space-6) 0 0;
+}
+
+.detail__isi .timeline__label {
+  margin: var(--space-6) 0 var(--space-2);
 }
 
 .persyaratan {
@@ -1675,11 +1688,6 @@
   align-items: center;
   gap: var(--space-6);
   max-width: 640px;
-  padding: var(--space-6);
-  border-radius: var(--radius-card);
-  background: rgb(5 16 27 / 55%);
-  border: var(--border-hairline) solid rgb(255 255 255 / 18%);
-  backdrop-filter: blur(6px);
 }
 
 .detail-banner__ikon {
@@ -1769,7 +1777,7 @@
 }
 
 .timeline__label {
-  margin: var(--space-3) 0 4px;
+  margin: var(--space-6) 0 var(--space-2);
   font-size: var(--text-body-sm);
   font-weight: var(--weight-semibold);
   color: var(--color-text);
