@@ -146,6 +146,31 @@ describe('petakanKategori dan petakanPersyaratan', () => {
     expect(p.kode).toBe('KTM')
     expect(p.wajib).toBe(true)
   })
+
+  it('memberi nilai bawaan untuk kolom opsional yang null', () => {
+    expect(petakanKategori({ id_kategori: 'KAT-SENI', nama_kategori: 'Seni', deskripsi: null, icon_url: null })).toEqual({
+      idKategori: 'KAT-SENI',
+      namaKategori: 'Seni',
+      deskripsi: '',
+      iconUrl: '',
+    })
+    expect(petakanKategori({ id_kategori: 'KAT-SENI', nama_kategori: 'Seni' }).deskripsi).toBe('')
+    expect(petakanDokumen({
+      id_dokumen: 'DKM-1',
+      id_pendaftaran: 'PD-1',
+      nama_file: 'ktm.pdf',
+      kode_dokumen: 'KTM',
+      tipe_dokumen: 'application/pdf',
+      file_url: null,
+      ukuran_file: 10,
+      tanggal_unggah: '2026-10-16T02:13:00+00:00',
+    }).fileUrl).toBe('')
+  })
+
+  it('mengembalikan null untuk baris pendaftaran dan pengguna yang kosong', () => {
+    expect(petakanPendaftaran(null)).toBeNull()
+    expect(petakanPengguna(null)).toBeNull()
+  })
 })
 
 describe('petakanTimeline', () => {

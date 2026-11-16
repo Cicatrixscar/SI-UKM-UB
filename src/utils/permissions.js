@@ -137,7 +137,7 @@ export function tahapRiwayat(pendaftaran) {
 
   const berkasSelesai = berkas === STATUS_BERKAS.LENGKAP || berkas === STATUS_BERKAS.SIAP_SELEKSI
   const siapSeleksi = berkas === STATUS_BERKAS.SIAP_SELEKSI
-  const seleksiSelesai = seleksi !== STATUS_SELEKSI.PENDING
+  const seleksiSelesai = Boolean(seleksi) && seleksi !== STATUS_SELEKSI.PENDING
 
   /** @type {Array<'selesai'|'aktif'|'belum'>} */
   const status = [

@@ -8,13 +8,18 @@ dokumen: apa yang diuji, berapa jalur independennya, dan hasilnya.
 
 | Bagian | Tes | Cakupan cabang |
 |---|---|---|
-| `src/utils/validators.js` | 28 tes di `tests/validators.test.js` | hampir penuh |
-| `src/utils/permissions.js` | belum ada | 0% |
-| `src/services/pemetaanBaris.js` | 16 tes | penuh untuk jalur normal |
+| `src/utils/validators.js` | 34 tes di `tests/validators.test.js` | 100% |
+| `src/utils/permissions.js` | 52 tes di `tests/permissions.test.js` | 100% |
+| `src/utils/format.js` | 28 tes di `tests/format.test.js` | 98,4% |
+| `src/services/pemetaanBaris.js` | 18 tes | 100% |
 | `src/services/*.js` | tidak diuji langsung | memanggil jaringan |
 
+Hasil eksekusi lengkap ada di [`hasil-whitebox.md`](hasil-whitebox.md). Berkas
+itu yang dilampirkan ke laporan.
+
 Artinya bahan laporan paling banyak datang dari `validators.js`, sedangkan
-`permissions.js` adalah celah terbesar.
+`permissions.js` adalah celah terbesar. Keduanya sudah ditutup; lihat
+`hasil-whitebox.md`.
 
 ## Metode menghitung V(G)
 
@@ -37,12 +42,12 @@ Prioritas ditentukan dari akibat kalau logikanya salah, bukan dari jumlah baris.
 
 | Fungsi | Berkas | V(G) | Kasus minimum | Status |
 |---|---|---|---|---|
-| `validasiBerkas` | `src/utils/validators.js` | 3 | 3 | sudah |
-| `validasiFormatBerkas` | `src/utils/validators.js` | 3 | 3 | sudah (4 tes) |
-| `validasiUkuranBerkas` | `src/utils/validators.js` | 4 | 4 | 3 tes, 1 cabang belum |
-| `bolehSubmitPendaftaran` | `src/utils/permissions.js` | 3 | 4 | belum |
-| `dalamPeriodeAktif` | `src/utils/permissions.js` | 7 | 6 | belum |
-| `tahapRiwayat` | `src/utils/permissions.js` | 11 | 16 kombinasi | belum |
+| `validasiBerkas` | `src/utils/validators.js` | 3 | 3 | sudah (4 tes) |
+| `validasiFormatBerkas` | `src/utils/validators.js` | 3 | 3 | sudah (5 tes) |
+| `validasiUkuranBerkas` | `src/utils/validators.js` | 4 | 4 | sudah (5 tes) |
+| `bolehSubmitPendaftaran` | `src/utils/permissions.js` | 3 | 4 | sudah (4 tes) |
+| `dalamPeriodeAktif` | `src/utils/permissions.js` | 7 | 6 | sudah (8 tes) |
+| `tahapRiwayat` | `src/utils/permissions.js` | 11 | 16 kombinasi | sudah (17 tes) |
 
 Alasan: `validasiBerkas` menentukan pesan error PRD §14 yang dilihat pengguna.
 `bolehSubmitPendaftaran` dan `dalamPeriodeAktif` adalah gerbang terakhir sebelum
@@ -54,20 +59,20 @@ stepper 5 tahap; kalau salah, status pendaftaran menyesatkan.
 
 | Fungsi | Berkas | V(G) | Kasus minimum | Status |
 |---|---|---|---|---|
-| `semuaBerkasValid` | `src/utils/validators.js` | 4 | 4 | 3 tes, cabang non-array belum |
-| `validasiDataDiri` | `src/utils/validators.js` | 2 | 5 | sudah |
-| `validasiAlasan` | `src/utils/validators.js` | 3 | 3 | sudah |
-| `bolehAksesForm` | `src/utils/permissions.js` | 2 | 3 | belum |
-| `bolehLanjutDokumen` | `src/utils/permissions.js` | 2 | 4 | belum |
-| `bolehKirimPendaftaran` | `src/utils/permissions.js` | 1 | 2 | belum |
+| `semuaBerkasValid` | `src/utils/validators.js` | 4 | 4 | sudah (5 tes) |
+| `validasiDataDiri` | `src/utils/validators.js` | 2 | 5 | sudah (4 tes) |
+| `validasiAlasan` | `src/utils/validators.js` | 3 | 3 | sudah (4 tes) |
+| `bolehAksesForm` | `src/utils/permissions.js` | 2 | 3 | sudah (3 tes) |
+| `bolehLanjutDokumen` | `src/utils/permissions.js` | 2 | 4 | sudah (5 tes) |
+| `bolehKirimPendaftaran` | `src/utils/permissions.js` | 1 | 2 | sudah (3 tes) |
 | `petakanUkm`, `petakanPendaftaran` | `src/services/pemetaanBaris.js` | 2 | 3 | sudah |
 
 ### Prioritas 3 — pelengkap
 
 | Fungsi | Berkas | V(G) | Kasus minimum | Status |
 |---|---|---|---|---|
-| `nomorTahapAktif` | `src/utils/permissions.js` | 2 | 2 | belum |
-| `statusTahapTimeline` | `src/utils/permissions.js` | 7 | 5 | belum |
+| `nomorTahapAktif` | `src/utils/permissions.js` | 2 | 2 | sudah (2 tes) |
+| `statusTahapTimeline` | `src/utils/permissions.js` | 7 | 5 | sudah (7 tes) |
 
 ### Tidak diuji whitebox, dan alasannya
 
@@ -153,19 +158,15 @@ disalin dari nama `it(...)` agar mudah dicari.
 
 ```bash
 npm test                 # seluruh tes
+npm run test:coverage    # tes + laporan cakupan
 npm run test:watch       # mode pantau saat menulis tes
 ```
 
-Alat ukur cakupan belum dipasang. Kalau dibutuhkan sebagai lampiran:
-
-```bash
-npm install -D @vitest/coverage-v8
-npx vitest run --coverage
-```
-
-Hasilnya tabel persen `stmt` dan `branch` per berkas, plus `coverage/index.html`
-yang bisa dicetak. Pasang hanya kalau dosen meminta angka cakupan; tanpa alat
-ini pun basis path di atas sudah memenuhi whitebox.
+`npm run test:coverage` memakai `@vitest/coverage-v8` (sudah terpasang sebagai
+devDependency). Hasilnya tabel persen `stmt` dan `branch` per berkas, plus
+`coverage/index.html` yang bisa dicetak sebagai lampiran. Hanya logika murni
+yang diukur (`src/utils/**` dan `src/services/pemetaanBaris.js`); pengaturannya
+ada di `vite.config.js`.
 
 ## Aturan penulisan tes
 

@@ -197,3 +197,38 @@ describe('semuaBerkasValid', () => {
     expect(semuaBerkasValid([])).toBe(false)
   })
 })
+
+/**
+ * Cabang yang belum tersentuh tes sebelumnya (lihat testing/README.md,
+ * prioritas 2). Ditambahkan agar cakupan cabang validators.js penuh.
+ */
+describe('cabang pertahanan (input cacat)', () => {
+  it('validasiUkuranBerkas menolak berkas tanpa properti size berupa angka', () => {
+    expect(validasiUkuranBerkas({ type: 'application/pdf' })).toEqual({
+      valid: false,
+      pesan: PESAN.UKURAN_FILE,
+    })
+  })
+
+  it('validasiBerkas menolak null', () => {
+    expect(validasiBerkas(null)).toEqual({ valid: false, pesan: PESAN.FORMAT_FILE })
+  })
+
+  it('semuaBerkasValid menolak nilai yang bukan array', () => {
+    expect(semuaBerkasValid(null)).toBe(false)
+    expect(semuaBerkasValid({ file: berkas('application/pdf', 1 * MB) })).toBe(false)
+  })
+
+  it('validasiEmail dan validasiAlasan menerima nilai null/undefined', () => {
+    expect(validasiEmail(undefined)).toEqual({ valid: false, pesan: PESAN.FIELD_WAJIB })
+    expect(validasiAlasan(undefined)).toEqual({ valid: false, pesan: PESAN.FIELD_WAJIB })
+  })
+
+  it('validasiFormatBerkas menolak objek tanpa properti type', () => {
+    expect(validasiFormatBerkas({})).toEqual({ valid: false, pesan: PESAN.FORMAT_FILE })
+  })
+
+  it('validasiUkuranBerkas menolak null', () => {
+    expect(validasiUkuranBerkas(null)).toEqual({ valid: false, pesan: PESAN.UKURAN_FILE })
+  })
+})

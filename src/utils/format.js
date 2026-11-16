@@ -108,7 +108,7 @@ export function formatTanggalWaktu(iso) {
  *          agar data dummy statis (G501) tetap koheren.
  * @param {string} iso
  * @param {string} [acuan] ISO acuan; default `config.tanggalDemo`
- * @returns {string} contoh "5 hari 3 jam", "3 jam 20 menit", "sudah ditutup"
+ * @returns {string} contoh "5 hari 3 jam", "3 jam", "20 menit", "sudah ditutup"
  */
 export function formatSisaWaktu(iso, acuan = config.tanggalDemo) {
   if (!iso) return '-'

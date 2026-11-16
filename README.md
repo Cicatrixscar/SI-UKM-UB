@@ -47,14 +47,16 @@ Perintah lain:
 ```bash
 npm run build      # hasil produksi di dist/
 npm run preview    # cek hasil build
-npm test           # 44 tes (vitest)
+npm test           # 132 tes (vitest)
+npm run test:coverage  # tes + laporan cakupan di coverage/
 npm run test:watch # tes mode pantau
 ```
 
 ## Struktur
 
 Rencana pengujian whitebox (fungsi mana yang diuji, V(G), dan basis path) ada di
-[`testing/README.md`](testing/README.md).
+[`testing/README.md`](testing/README.md), hasil eksekusinya di
+[`testing/hasil-whitebox.md`](testing/hasil-whitebox.md).
 
 ```
 src/
