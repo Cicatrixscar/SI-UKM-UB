@@ -2,23 +2,17 @@
  * Service: notifikasi mahasiswa (UC005, UC007).
  *
  * [DOKUMEN] PRD v0.3 §7.9 — tabel `notifikasiService` `[USULAN]`:
- *   | Method                   | Parameter | Return   | UC       |
- *   | getNotifikasiSaya(id)    | String    | Notifikasi[] | UC005, UC007 |
- *   | tandaiDibaca(idNotifikasi)| String   | boolean  | UC005, UC007 |
+ *   | getNotifikasiSaya(id)    | String | Notifikasi[] | UC005, UC007 |
+ *   | tandaiDibaca(idNotifikasi)| String | boolean     | UC005, UC007 |
  * [DOKUMEN] PRD v0.3 §6.10 — entitas Notifikasi.
- * [DOKUMEN] AI.md §4 — setiap service mengembalikan Promise; halaman hanya
- *           memanggil `services/`, tidak mengimpor `mock/`.
+ * [DOKUMEN] Data dibaca dari tabel `notifikasi` di Supabase.
  *
  * [USULAN] `tandaiSemuaDibaca(idMahasiswa)` — dibutuhkan tombol "Tandai semua
  *          dibaca" pada desain Hi-Fi layar Notifikasi; tidak ada di PRD.
  */
 
-import { config } from '../config.js'
-import {
-  mockGetNotifikasiSaya,
-  mockTandaiDibaca,
-  mockTandaiSemuaDibaca,
-} from '../mock/notifikasiMock.js'
+import { ambilSupabase, pastikan } from './supabaseClient.js'
+import { petakanNotifikasi } from './pemetaanBaris.js'
 
 /**
  * Ambil seluruh notifikasi milik mahasiswa (terbaru di atas).
@@ -27,8 +21,13 @@ import {
  * @returns {Promise<import('../models/Notifikasi.js').Notifikasi[]>}
  */
 export async function getNotifikasiSaya(idMahasiswa) {
-  if (!config.USE_MOCK) throw new Error('Backend belum tersedia')
-  return mockGetNotifikasiSaya(idMahasiswa)
+  const { data, error } = await ambilSupabase()
+    .from('notifikasi')
+    .select('*')
+    .eq('id_mahasiswa', idMahasiswa)
+    .order('timestamp', { ascending: false })
+  pastikan(error)
+  return (data ?? []).map(petakanNotifikasi)
 }
 
 /**
@@ -38,17 +37,28 @@ export async function getNotifikasiSaya(idMahasiswa) {
  * @returns {Promise<boolean>}
  */
 export async function tandaiDibaca(idNotifikasi) {
-  if (!config.USE_MOCK) throw new Error('Backend belum tersedia')
-  return mockTandaiDibaca(idNotifikasi)
+  const { data, error } = await ambilSupabase()
+    .from('notifikasi')
+    .update({ dibaca: true })
+    .eq('id_notifikasi', idNotifikasi)
+    .select('id_notifikasi')
+  pastikan(error)
+  return (data ?? []).length > 0
 }
 
 /**
  * Tandai seluruh notifikasi mahasiswa sudah dibaca.
  * [USULAN] PRD §7.9 hanya memuat `tandaiDibaca`.
  * @param {string} idMahasiswa
- * @returns {Promise<boolean>}
+ * @returns {Promise<boolean>} true bila ada yang berubah
  */
 export async function tandaiSemuaDibaca(idMahasiswa) {
-  if (!config.USE_MOCK) throw new Error('Backend belum tersedia')
-  return mockTandaiSemuaDibaca(idMahasiswa)
+  const { data, error } = await ambilSupabase()
+    .from('notifikasi')
+    .update({ dibaca: true })
+    .eq('id_mahasiswa', idMahasiswa)
+    .eq('dibaca', false)
+    .select('id_notifikasi')
+  pastikan(error)
+  return (data ?? []).length > 0
 }

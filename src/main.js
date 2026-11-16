@@ -68,7 +68,7 @@ const akar = document.getElementById('app')
 
 if (import.meta.env.DEV) {
   // Penanda Tahap T0 — halaman kosong pada `#/` sampai T1 menggantinya.
-  console.info(`[SI UKM UB] mock=${config.USE_MOCK} · rute=${location.hash || '#/'}`)
+  console.info(`[SI UKM UB] backend=supabase · rute=${location.hash || '#/'}`)
 }
 
 mulaiRouter(akar)

@@ -6,8 +6,12 @@
  *             import mock langsung."
  */
 export const config = {
-  /** true = pakai mock in-memory; false = pakai http (belum ada backend). */
-  USE_MOCK: true,
+  /**
+   * Dulu pemilih implementasi service (mock in-memory / http). Sejak service
+   * memakai Supabase langsung, nilainya tetap ada untuk kompatibilitas saja dan
+   * selalu false.
+   */
+  USE_MOCK: false,
 
   /** Nama aplikasi, dipakai di title dan AppShell. */
   namaAplikasi: 'Portal UKM',

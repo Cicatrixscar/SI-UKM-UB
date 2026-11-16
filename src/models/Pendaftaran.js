@@ -54,7 +54,7 @@ export function createPendaftaran(data) {
  * Sumber: Modul II (MP2) §3.4.1 hal. 67 — Pendaftaran.saveData(dataForm): String
  *         Sumber: MP2 §3.6 PC-04 hal. 84 — "idPendaftaran ← saveData(dataForm)".
  * [USULAN] parameter `daftarPendaftaran` karena method pada modul bersifat
- *          class-level; penyimpanan in-memory ada di mock/store.js.
+ *          class-level; penyimpanan nyata dilakukan service ke Supabase.
  * [USULAN] format idPendaftaran (keputusan sementara G4: nomor pendaftaran tidak dibuat).
  */
 export function saveData(daftarPendaftaran, dataForm) {

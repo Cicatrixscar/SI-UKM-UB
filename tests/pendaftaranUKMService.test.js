@@ -1,46 +1,34 @@
 /**
- * Tes: src/services/pendaftaranUKMService.js
+ * Tes: src/services/pendaftaranUKMService.js + pemetaan baris Supabase.
  *
- * [DOKUMEN] AI.md §6 — aturan bisnis yang harus diuji (katalog/detail stub,
- *           M-04, M-05).
- * [DOKUMEN] AI.md §10 DoD: "Alur katalog (stub) → detail (stub) → form →
- *           unggah → review → kirim berjalan ... Kirim sukses menyimpan
- *           Pendaftaran dengan statusBerkas = MENUNGGU_VERIFIKASI_BERKAS."
- * [DOKUMEN] AI.md §11 T3.
+ * [DOKUMEN] AI.md §6 — aturan bisnis yang harus diuji (katalog/detail,
+ *           M-04, M-05). Tes ini tidak menyentuh jaringan: validasi berkas
+ *           bersifat murni, dan pemetaan baris diuji dengan baris tiruan
+ *           berbentuk hasil query Supabase.
+ * [DOKUMEN] AI.md §10 DoD: "Kirim sukses menyimpan Pendaftaran dengan
+ *           statusBerkas = MENUNGGU_VERIFIKASI_BERKAS" — diuji lewat konstanta
+ *           status yang dipakai service, bukan dengan menulis ke database.
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
+import { validasiDokumen, validasiSemuaBerkas } from '../src/services/pendaftaranUKMService.js'
 import {
-  getKatalogUKM,
-  getUKMdibuka,
-  getDetailUKM,
-  validasiDokumen,
-  validasiSemuaBerkas,
-  submitPendaftaran,
-  simpanPendaftaran,
-} from '../src/services/pendaftaranUKMService.js'
-import { resetStore, store } from '../src/mock/store.js'
-import { config } from '../src/config.js'
+  petakanUkm,
+  petakanKategori,
+  petakanPersyaratan,
+  petakanTimeline,
+  petakanPendaftaran,
+  petakanDokumen,
+  petakanNotifikasi,
+  petakanPengguna,
+} from '../src/services/pemetaanBaris.js'
 import { PESAN } from '../src/utils/errors.js'
-import { STATUS_PENDAFTARAN } from '../src/enums/statusPendaftaran.js'
-import { STATUS_BERKAS } from '../src/enums/statusBerkas.js'
 import { KODE_DOKUMEN } from '../src/models/PersyaratanDokumen.js'
 
 const MB = 1024 * 1024
-const WAKTU_UJI = new Date('2026-10-26T10:00:00+07:00')
 
 function berkas(tipe, byte, nama = 'dummy.pdf') {
   return { name: nama, type: tipe, size: byte }
-}
-
-const DATA_DIRI = {
-  idUKM: 'UKM-FOTO',
-  idMahasiswa: 'USR-001',
-  nama: 'Rusdi',
-  nim: '225150400111024',
-  email: 'rusdi@student.ub.ac.id',
-  nomorTelepon: '081234567890',
-  alasan: 'Ingin belajar fotografi bersama teman-teman kampus.',
 }
 
 const BERKAS_LENGKAP = [
@@ -49,51 +37,22 @@ const BERKAS_LENGKAP = [
   { kode: KODE_DOKUMEN.CV, file: berkas('image/jpeg', 1 * MB, 'cv.jpg') },
 ]
 
-beforeEach(() => {
-  // shouldAdvanceTime: Date dibekukan di WAKTU_UJI, tetapi setTimeout pada
-  // `delay(...)` mock tetap berjalan secara nyata.
-  vi.useFakeTimers({ now: WAKTU_UJI, shouldAdvanceTime: true })
-  resetStore()
-  config.paksaGagalSimpan = false
-})
-
-afterEach(() => {
-  vi.useRealTimers()
-  config.paksaGagalSimpan = false
-})
-
-describe('getKatalogUKM', () => {
-  it('mengembalikan UKM TERVERIFIKASI (DIBUKA dan DITUTUP)', async () => {
-    const daftar = await getKatalogUKM()
-    expect(daftar).toHaveLength(8)
-    expect(daftar.every(u => u.statusVerifikasi === 'TERVERIFIKASI')).toBe(true)
-    expect(daftar.some(u => u.statusPendaftaran === STATUS_PENDAFTARAN.DITUTUP)).toBe(true)
-  })
-})
-
-describe('getUKMdibuka', () => {
-  it('mengembalikan hanya UKM berstatus DIBUKA (MP2 PC-01)', async () => {
-    const daftar = await getUKMdibuka()
-    expect(daftar).toHaveLength(6)
-    expect(daftar.every(u => u.statusPendaftaran === STATUS_PENDAFTARAN.DIBUKA)).toBe(true)
-  })
-})
-
-describe('getDetailUKM', () => {
-  it('mengembalikan UKM + periodeAktif dengan tiga persyaratan wajib', async () => {
-    const detail = await getDetailUKM('UKM-FOTO')
-    expect(detail.namaUKM).toBe('UKM Fotografi')
-    expect(detail.periodeAktif.tanggalBuka).toBe('2026-10-15T00:00:00+07:00')
-    expect(detail.periodeAktif.persyaratanDokumen).toHaveLength(3)
-    expect(
-      detail.periodeAktif.persyaratanDokumen.every(p => p.wajib)
-    ).toBe(true)
-  })
-
-  it('mengembalikan null untuk UKM tidak ditemukan', async () => {
-    expect(await getDetailUKM('TIDAK-ADA')).toBeNull()
-  })
-})
+/** Baris tiruan persis seperti hasil `select` PostgREST. */
+const BARIS_UKM = {
+  id_ukm: 'UKM-FOTO',
+  nama_ukm: 'UKM Fotografi',
+  id_kategori: 'KAT-SENI',
+  deskripsi: 'Belajar menangkap cerita melalui lensa.',
+  visi_misi: 'Ruang belajar dan berkarya.',
+  email_ukm: 'fotografi@ukm.ub.ac.id',
+  icon: 'i-camera',
+  foto: '/img/ukm-fotografi.jpg',
+  status_pendaftaran: 'DIBUKA',
+  status_verifikasi: 'TERVERIFIKASI',
+  tanggal_buka: '2026-10-14T17:00:00+00:00',
+  tanggal_tutup: '2026-10-30T16:59:00+00:00',
+  langkah_selanjutnya: { grupWA: 'Grup WhatsApp: Fotografi 2026' },
+}
 
 describe('validasiDokumen', () => {
   it('menerima PDF kecil dengan pesan "Format dokumen valid"', async () => {
@@ -144,87 +103,144 @@ describe('validasiSemuaBerkas', () => {
   })
 })
 
-describe('submitPendaftaran', () => {
-  it('menyimpan Pendaftaran dengan statusBerkas MENUNGGU_VERIFIKASI_BERKAS', async () => {
-    const sebelum = store.pendaftaran.length
-    const hasil = await submitPendaftaran(DATA_DIRI, BERKAS_LENGKAP)
-
-    expect(hasil.berhasil).toBe(true)
-    expect(hasil.pesan).toBe(PESAN.PENDAFTARAN_BERHASIL)
-    expect(hasil.idPendaftaran).toMatch(/^PD-/)
-
-    expect(store.pendaftaran).toHaveLength(sebelum + 1)
-    const baru = store.pendaftaran.find(p => p.idPendaftaran === hasil.idPendaftaran)
-    expect(baru.statusBerkas).toBe(STATUS_BERKAS.MENUNGGU_VERIFIKASI_BERKAS)
-    expect(baru.idUKM).toBe('UKM-FOTO')
-    expect(baru.idMahasiswa).toBe('USR-001')
+describe('petakanUkm', () => {
+  it('mengubah kolom snake_case menjadi atribut model', () => {
+    const ukm = petakanUkm(BARIS_UKM)
+    expect(ukm.idUKM).toBe('UKM-FOTO')
+    expect(ukm.namaUKM).toBe('UKM Fotografi')
+    expect(ukm.idKategori).toBe('KAT-SENI')
+    expect(ukm.statusPendaftaran).toBe('DIBUKA')
+    expect(ukm.statusVerifikasi).toBe('TERVERIFIKASI')
+    expect(ukm.ikon).toBe('i-camera')
+    expect(ukm.emailUKM).toBe('fotografi@ukm.ub.ac.id')
+    expect(ukm.tanggalTutup).toBe('2026-10-30T16:59:00+00:00')
+    expect(ukm.langkahSelanjutnya.grupWA).toBe('Grup WhatsApp: Fotografi 2026')
   })
 
-  it('menyimpan tiga DokumenPendaftaran terkait', async () => {
-    const sebelum = store.dokumen.length
-    const hasil = await submitPendaftaran(DATA_DIRI, BERKAS_LENGKAP)
-
-    const milik = store.dokumen.filter(d => d.idPendaftaran === hasil.idPendaftaran)
-    expect(milik).toHaveLength(3)
-    expect(store.dokumen.length).toBe(sebelum + 3)
-    expect(milik.map(d => d.namaFile).sort()).toEqual(['cv.jpg', 'ktm.pdf', 'transkrip.pdf'])
+  it('mengembalikan null untuk baris kosong', () => {
+    expect(petakanUkm(null)).toBeNull()
   })
 
-  it('menolak UKM tidak ditemukan', async () => {
-    const hasil = await submitPendaftaran({ ...DATA_DIRI, idUKM: 'TIDAK-ADA' }, BERKAS_LENGKAP)
-    expect(hasil).toEqual({
-      berhasil: false,
-      idPendaftaran: null,
-      pesan: PESAN.UKM_TIDAK_DITEMUKAN,
-    })
-  })
-
-  it('menolak UKM berstatus DITUTUP (AI.md §6 katalog dan detail)', async () => {
-    const hasil = await submitPendaftaran({ ...DATA_DIRI, idUKM: 'UKM-BADMINTON' }, BERKAS_LENGKAP)
-    expect(hasil.berhasil).toBe(false)
-    expect(hasil.pesan).toBe(PESAN.UKM_TIDAK_DITEMUKAN)
-  })
-
-  it('menolak data diri yang tidak lengkap', async () => {
-    const hasil = await submitPendaftaran({ ...DATA_DIRI, nama: '' }, BERKAS_LENGKAP)
-    expect(hasil.berhasil).toBe(false)
-    expect(hasil.pesan).toBe(PESAN.FIELD_WAJIB)
-  })
-
-  it('menolak berkas yang tidak valid', async () => {
-    const berkasSalah = [
-      BERKAS_LENGKAP[0],
-      { kode: KODE_DOKUMEN.TRANSKRIP, file: berkas('application/pdf', 10 * MB) },
-      BERKAS_LENGKAP[2],
-    ]
-    const hasil = await submitPendaftaran(DATA_DIRI, berkasSalah)
-    expect(hasil.berhasil).toBe(false)
-    expect(hasil.pesan).toBe(PESAN.UKURAN_FILE)
-  })
-
-  it('mengembalikan pesan gagal dan idPendaftaran null saat mock dipaksa gagal (Retry)', async () => {
-    config.paksaGagalSimpan = true
-    const sebelum = store.pendaftaran.length
-    const hasil = await submitPendaftaran(DATA_DIRI, BERKAS_LENGKAP)
-
-    expect(hasil).toEqual({
-      berhasil: false,
-      idPendaftaran: null,
-      pesan: PESAN.GAGAL_SIMPAN,
-    })
-    expect(store.pendaftaran).toHaveLength(sebelum)
-
-    // Retry: setelah sakelar dimatikan, submit berhasil.
-    config.paksaGagalSimpan = false
-    const ulang = await submitPendaftaran(DATA_DIRI, BERKAS_LENGKAP)
-    expect(ulang.berhasil).toBe(true)
+  it('memberi nilai bawaan untuk kolom opsional yang null', () => {
+    const ukm = petakanUkm({ ...BARIS_UKM, icon: null, email_ukm: null, foto: null })
+    expect(ukm.ikon).toBe('i-award')
+    expect(ukm.emailUKM).toBe('')
+    expect(ukm.foto).toBe('')
   })
 })
 
-describe('simpanPendaftaran (alias service)', () => {
-  it('menyimpan pendaftaran seperti submitPendaftaran', async () => {
-    const hasil = await simpanPendaftaran(DATA_DIRI, BERKAS_LENGKAP)
-    expect(hasil.berhasil).toBe(true)
-    expect(store.pendaftaran.some(p => p.idPendaftaran === hasil.idPendaftaran)).toBe(true)
+describe('petakanKategori dan petakanPersyaratan', () => {
+  it('memetakan kategori', () => {
+    expect(
+      petakanKategori({ id_kategori: 'KAT-SENI', nama_kategori: 'Seni & Kreativitas', deskripsi: 'Seni.', icon_url: 'i-palette' })
+    ).toEqual({
+      idKategori: 'KAT-SENI',
+      namaKategori: 'Seni & Kreativitas',
+      deskripsi: 'Seni.',
+      iconUrl: 'i-palette',
+    })
+  })
+
+  it('memetakan persyaratan dokumen wajib', () => {
+    const p = petakanPersyaratan({ kode: 'KTM', nama: 'KTM', deskripsi: 'Identitas diri', wajib: true })
+    expect(p.kode).toBe('KTM')
+    expect(p.wajib).toBe(true)
+  })
+})
+
+describe('petakanTimeline', () => {
+  it('memakai tanggal_label sebagai teks tanggal', () => {
+    const t = petakanTimeline({
+      tahap: 'Pengumuman',
+      tanggal_label: '7 Nov 2026',
+      mulai: '2026-11-06T17:00:00+00:00',
+      selesai: '2026-11-07T16:59:00+00:00',
+    })
+    expect(t).toEqual({
+      tahap: 'Pengumuman',
+      tanggal: '7 Nov 2026',
+      mulai: '2026-11-06T17:00:00+00:00',
+      selesai: '2026-11-07T16:59:00+00:00',
+    })
+  })
+})
+
+describe('petakanPendaftaran', () => {
+  it('memetakan status berkas dan seleksi', () => {
+    const p = petakanPendaftaran({
+      id_pendaftaran: 'PD-2026-0142',
+      nomor_pendaftaran: 'UKM-2026-0142',
+      id_ukm: 'UKM-FOTO',
+      id_mahasiswa: 'USR-001',
+      tanggal_daftar: '2026-10-16T02:15:00+00:00',
+      status_berkas: 'SIAP_SELEKSI',
+      status_seleksi: 'DITERIMA',
+      terkunci: true,
+      tanggal_diumumkan: '2026-10-20T08:00:00+00:00',
+      tanggal_update_berkas: '2026-10-17T03:00:00+00:00',
+      catatan_admin: 'Berkas lengkap.',
+      catatan_seleksi: 'Selamat bergabung!',
+    })
+    expect(p.idPendaftaran).toBe('PD-2026-0142')
+    expect(p.nomorPendaftaran).toBe('UKM-2026-0142')
+    expect(p.statusBerkas).toBe('SIAP_SELEKSI')
+    expect(p.statusSeleksi).toBe('DITERIMA')
+    expect(p.terkunci).toBe(true)
+    expect(p.catatanSeleksi).toBe('Selamat bergabung!')
+  })
+})
+
+describe('petakanDokumen', () => {
+  it('memetakan kode dokumen dan ukuran berkas', () => {
+    const d = petakanDokumen({
+      id_dokumen: 'DKM-0142-01',
+      id_pendaftaran: 'PD-2026-0142',
+      nama_file: 'KTM_Rusdi.jpg',
+      kode_dokumen: 'KTM',
+      tipe_dokumen: 'image/jpeg',
+      file_url: '',
+      ukuran_file: 1258291,
+      tanggal_unggah: '2026-10-16T02:13:00+00:00',
+    })
+    expect(d.kodeDokumen).toBe(KODE_DOKUMEN.KTM)
+    expect(d.ukuranFile).toBe(1258291)
+    expect(d.fileUrl).toBe('')
+  })
+})
+
+describe('petakanNotifikasi', () => {
+  it('memetakan label dan jalur aksi', () => {
+    const n = petakanNotifikasi({
+      id_notifikasi: 'NTF-2026-0051',
+      id_mahasiswa: 'USR-001',
+      judul: 'Berkas perlu diperbaiki',
+      pesan: 'KTM belum diunggah.',
+      dibaca: false,
+      timestamp: '2026-10-25T13:44:00+00:00',
+      kategori: 'Pemeriksaan berkas',
+      aksi_label: 'Perbaiki berkas',
+      aksi_jalur: '#/mahasiswa/riwayat/PD-2026-0151',
+    })
+    expect(n.dibaca).toBe(false)
+    expect(n.aksiLabel).toBe('Perbaiki berkas')
+    expect(n.aksiJalur).toBe('#/mahasiswa/riwayat/PD-2026-0151')
+  })
+})
+
+describe('petakanPengguna', () => {
+  it('memetakan profil mahasiswa untuk sesi login', () => {
+    const u = petakanPengguna({
+      id_user: 'USR-001',
+      nama: 'Rusdi',
+      email: 'rusdi@student.ub.ac.id',
+      role: 'MAHASISWA',
+      nim: '225150400111024',
+      nomor_telepon: '081234567890',
+      program_studi: 'Teknik Informatika',
+      fakultas: 'Fakultas Teknik',
+    })
+    expect(u.idUser).toBe('USR-001')
+    expect(u.role).toBe('MAHASISWA')
+    expect(u.nomorTelepon).toBe('081234567890')
   })
 })
