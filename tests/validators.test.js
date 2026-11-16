@@ -11,6 +11,7 @@ import { describe, it, expect } from 'vitest'
 import {
   validasiWajib,
   validasiEmail,
+  validasiEmailUB,
   validasiNim,
   validasiAlasan,
   validasiDataDiri,
@@ -56,6 +57,25 @@ describe('validasiEmail', () => {
   it('menerima email mahasiswa UB', () => {
     expect(validasiEmail('rusdi@student.ub.ac.id').valid).toBe(true)
     expect(validasiEmail('dosen@ub.ac.id').valid).toBe(true)
+  })
+})
+
+describe('validasiEmailUB', () => {
+  it('menolak email kosong', () => {
+    expect(validasiEmailUB('').valid).toBe(false)
+  })
+
+  it('menolak email di luar domain ub.ac.id / student.ub.ac.id', () => {
+    expect(validasiEmailUB('user@gmail.com').valid).toBe(false)
+    expect(validasiEmailUB('user@yahoo.co.id').valid).toBe(false)
+    expect(validasiEmailUB('user@ub.ac.id.evil.com').valid).toBe(false)
+  })
+
+  it('menerima email berakhiran ub.ac.id atau student.ub.ac.id', () => {
+    expect(validasiEmailUB('ascaryahaldis03@student.ub.ac.id').valid).toBe(true)
+    expect(validasiEmailUB('admin@ub.ac.id').valid).toBe(true)
+    expect(validasiEmailUB('rusdi@student.ub.ac.id').valid).toBe(true)
+    expect(validasiEmailUB('dosen@filkom.ub.ac.id').valid).toBe(true)
   })
 })
 

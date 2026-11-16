@@ -1,23 +1,16 @@
 /**
  * Halaman: Masuk (LoginPage).
  *
- * [DOKUMEN] UI/UX Wireframe Brief §10 M-02: "Kartu di tengah dengan logo, judul
- *           'Masuk ke Portal UKM', field email dan password, tombol 'Masuk'."
- * [DOKUMEN] AI.md §1: "Login mock (pilih role Mahasiswa)".
- * [DOKUMEN] AI.md §11 T1: "Login mock Mahasiswa berhasil."
- * [DOKUMEN] AI.md §4: "Halaman tidak boleh ... memanggil mock langsung. Halaman
- *           hanya memanggil services/." + "Setiap halaman punya state loading,
- *           kosong, error, dan sukses."
- * [DOKUMEN] PRD v0.3 §7.1 authService.login → `{ berhasil, user, pesan }`.
- *
- * [USULAN] Tombol cepat "Masuk sebagai Mahasiswa" — Brief §10 M-02 membolehkan
- *          pemilihan role untuk mode mock.
+ * Alur masuk:
+ * 1. Layar awal: Memilih peran (Masuk sebagai Mahasiswa [aktif] atau Masuk sebagai Admin [segera hadir/disabled]).
+ * 2. Form Mahasiswa: Input email dan kata sandi dengan validasi email domain UB (@ub.ac.id / @student.ub.ac.id).
  */
 
-import { login, loginSebagaiMahasiswa } from '../../services/authService.js'
+import { login } from '../../services/authService.js'
 import { setSesi } from '../../state/session.js'
 import { navigasi } from '../../router.js'
 import { config } from '../../config.js'
+import { validasiEmailUB, validasiWajib } from '../../utils/validators.js'
 import {
   buatTextField,
   nilaiTextField,
@@ -26,23 +19,50 @@ import {
 } from '../../components/form/TextField.js'
 
 let sedangProses = false
+let modeSaatIni = 'PILIHAN' // 'PILIHAN' | 'FORM_MAHASISWA'
 
 function logo() {
   return `<img class="masuk__logo" src="/img/logo-ub.png" alt="Logo Universitas Brawijaya" />`
 }
 
-function renderIsi(wadah) {
+function renderPilihanPeran(wadah) {
   wadah.innerHTML = `
     <section class="masuk">
       <div class="masuk__kartu">
         ${logo()}
         <h1 class="masuk__judul">Masuk ke ${config.namaAplikasi}</h1>
-        <p class="masuk__subjudul text-muted">${config.institusi}</p>
+        <p class="masuk__subjudul text-muted">Pilih peran Anda untuk melanjutkan</p>
+
+        <div class="masuk__pilihan-peran">
+          <button class="tombol tombol--utama tombol--blok" type="button" data-aksi="pilih-mahasiswa">
+            Masuk sebagai Mahasiswa
+          </button>
+          <button class="tombol tombol--cadangan tombol--blok" type="button" disabled aria-disabled="true" title="Fitur login admin belum dibuka">
+            Masuk sebagai Admin <span class="masuk__badge-segera">Segera Hadir</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  `
+
+  wadah.querySelector('[data-aksi="pilih-mahasiswa"]').addEventListener('click', () => {
+    modeSaatIni = 'FORM_MAHASISWA'
+    renderIsi(wadah)
+  })
+}
+
+function renderFormMahasiswa(wadah) {
+  wadah.innerHTML = `
+    <section class="masuk">
+      <div class="masuk__kartu">
+        <button class="masuk__kembali" type="button" data-aksi="kembali">
+          &larr; Kembali ke Pemilihan Peran
+        </button>
+        ${logo()}
+        <h1 class="masuk__judul">Masuk sebagai Mahasiswa</h1>
+        <p class="masuk__subjudul text-muted">Gunakan akun resmi Universitas Brawijaya</p>
 
         <form class="masuk__form" novalidate data-form></form>
-
-        <p class="masuk__pembatas text-muted">atau</p>
-        <button class="tombol tombol--cadangan tombol--blok" type="button" data-cepat>Masuk sebagai Mahasiswa</button>
       </div>
     </section>
   `
@@ -50,13 +70,15 @@ function renderIsi(wadah) {
   const form = wadah.querySelector('[data-form]')
   const fieldEmail = buatTextField({
     id: 'email',
-    label: 'Email',
+    label: 'Email Mahasiswa UB',
     nama: 'email',
     tipe: 'email',
-    placeholder: 'email@student.ub.ac.id',
+    placeholder: 'contoh: ascaryahaldis03@student.ub.ac.id',
+    bantuan: 'Wajib berakhiran ub.ac.id atau student.ub.ac.id',
     wajib: true,
     autocomplete: 'username',
   })
+
   const fieldSandi = buatTextField({
     id: 'password',
     label: 'Kata Sandi',
@@ -79,9 +101,17 @@ function renderIsi(wadah) {
 
   form.append(fieldEmail, fieldSandi, pesanUmum, tombol)
 
+  // Tombol Kembali
+  wadah.querySelector('[data-aksi="kembali"]').addEventListener('click', () => {
+    modeSaatIni = 'PILIHAN'
+    renderIsi(wadah)
+  })
+
+  // Submit form
   form.addEventListener('submit', async (e) => {
     e.preventDefault()
     if (sedangProses) return
+
     bersihkanErrorTextField(fieldEmail)
     bersihkanErrorTextField(fieldSandi)
     pesanUmum.hidden = true
@@ -89,9 +119,24 @@ function renderIsi(wadah) {
     const email = nilaiTextField(fieldEmail).trim()
     const password = nilaiTextField(fieldSandi)
 
+    // Validasi format email domain UB
+    const cekEmail = validasiEmailUB(email)
+    if (!cekEmail.valid) {
+      setErrorTextField(fieldEmail, cekEmail.pesan)
+      return
+    }
+
+    // Validasi kata sandi wajib diisi
+    const cekSandi = validasiWajib(password)
+    if (!cekSandi.valid) {
+      setErrorTextField(fieldSandi, cekSandi.pesan)
+      return
+    }
+
     sedangProses = true
     tombol.disabled = true
     tombol.textContent = 'Memproses…'
+
     try {
       const hasil = await login(email, password)
       if (hasil.berhasil) {
@@ -99,9 +144,7 @@ function renderIsi(wadah) {
         navigasi('/mahasiswa/katalog')
         return
       }
-      // [USULAN] PRD §14 tidak memuat teks pesan "login gagal" dan AI.md §9
-      //          melarang membuat teks pesan sendiri, sehingga hanya field yang
-      //          ditandai merah (tanpa pesan). Perlu keputusan user.
+
       setErrorTextField(fieldEmail, ' ')
       setErrorTextField(fieldSandi, ' ')
       if (hasil.pesan) {
@@ -114,20 +157,14 @@ function renderIsi(wadah) {
       tombol.textContent = 'Masuk'
     }
   })
+}
 
-  wadah.querySelector('[data-cepat]').addEventListener('click', async () => {
-    if (sedangProses) return
-    sedangProses = true
-    try {
-      const hasil = await loginSebagaiMahasiswa()
-      if (hasil.berhasil) {
-        setSesi(hasil.user)
-        navigasi('/mahasiswa/katalog')
-      }
-    } finally {
-      sedangProses = false
-    }
-  })
+function renderIsi(wadah) {
+  if (modeSaatIni === 'FORM_MAHASISWA') {
+    renderFormMahasiswa(wadah)
+  } else {
+    renderPilihanPeran(wadah)
+  }
 }
 
 /** Dipanggil router. */

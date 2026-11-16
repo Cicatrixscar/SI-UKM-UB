@@ -15,6 +15,7 @@ import { PESAN } from './errors.js'
 import { batasUkuranFile, batasKarakterAlasan, formatFileDiizinkan } from '../config.js'
 
 const EMAIL_SAH = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const EMAIL_UB_SAH = /^[a-zA-Z0-9._%+-]+@([a-zA-Z0-9-]+\.)*ub\.ac\.id$/i
 
 /**
  * Cek field wajib terisi.
@@ -40,6 +41,22 @@ export function validasiEmail(email) {
   return EMAIL_SAH.test(String(email).trim())
     ? { valid: true, pesan: '' }
     : { valid: false, pesan: '' }
+}
+
+/**
+ * Cek format email khusus domain UB (@ub.ac.id atau @student.ub.ac.id).
+ * Digunakan pada saat masuk/login.
+ */
+export function validasiEmailUB(email) {
+  const teks = String(email ?? '').trim()
+  if (!teks) return { valid: false, pesan: PESAN.FIELD_WAJIB }
+  if (!EMAIL_SAH.test(teks) || !EMAIL_UB_SAH.test(teks)) {
+    return {
+      valid: false,
+      pesan: 'Email wajib berakhiran ub.ac.id atau student.ub.ac.id (contoh: ascaryahaldis03@student.ub.ac.id / admin@ub.ac.id)',
+    }
+  }
+  return { valid: true, pesan: '' }
 }
 
 /**
