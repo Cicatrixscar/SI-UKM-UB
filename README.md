@@ -58,6 +58,10 @@ Rencana pengujian whitebox (fungsi mana yang diuji, V(G), dan basis path) ada di
 [`testing/README.md`](testing/README.md), hasil eksekusinya di
 [`testing/hasil-whitebox.md`](testing/hasil-whitebox.md).
 
+Keputusan teknis dan rencana yang belum dikerjakan (termasuk letak "backend"
+dan rencana pertanyaan kustom per UKM) ada di
+[`catatan-development.md`](catatan-development.md).
+
 ```
 src/
   pages/        satu berkas per layar
@@ -69,6 +73,7 @@ src/
 supabase/       skrip SQL (schema, seed, izin tulis)
 tests/          tes vitest
 testing/        dokumen rencana whitebox
+catatan-development.md   keputusan teknis dan rencana lanjutan
 ```
 
 Halaman hanya memanggil `services/`. Pemetaan kolom `snake_case` dari database
