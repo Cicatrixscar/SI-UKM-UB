@@ -17,12 +17,17 @@ import { config } from '../config.js'
 import { ambilSupabase, pastikan } from './supabaseClient.js'
 import { petakanPengguna } from './pemetaanBaris.js'
 import { logout as logoutPengguna } from '../models/Pengguna.js'
+import { hashPassword, verifikasiPassword } from '../utils/crypto.js'
 
-/** @returns {Promise<{berhasil: boolean, user: object|null, pesan: string}>} */
+/**
+ * Login mahasiswa.
+ * Wajib terdaftar di database Supabase dan kata sandi cocok dengan password_hash.
+ * @returns {Promise<{berhasil: boolean, user: object|null, pesan: string}>}
+ */
 export async function login(email, pass) {
-  // `pass` sengaja tidak diverifikasi — mode demo frontend
-  void pass
   const emailBersih = String(email ?? '').trim().toLowerCase()
+  const passwordInput = String(pass ?? '')
+
   try {
     // Cari data pengguna yang sudah terdaftar di Supabase
     const { data, error } = await ambilSupabase()
@@ -32,38 +37,168 @@ export async function login(email, pass) {
       .maybeSingle()
     pastikan(error)
 
-    if (data) {
-      return { berhasil: true, user: petakanPengguna(data), pesan: '' }
+    if (!data) {
+      return {
+        berhasil: false,
+        user: null,
+        pesan: 'Akun belum terdaftar. Silakan daftar akun mahasiswa terlebih dahulu.',
+      }
     }
 
-    // Jika belum ada di tabel pengguna, buat objek sesi lokal saja tanpa mencatat/mengubah database
-    const namaPrefix = emailBersih.split('@')[0]
-    const namaFormatted = namaPrefix
-      .replace(/[._0-9]/g, ' ')
-      .trim()
-      .split(' ')
-      .filter(Boolean)
-      .map(kata => kata.charAt(0).toUpperCase() + kata.slice(1))
-      .join(' ')
-
-    const angkaEmail = emailBersih.match(/\d+/)
-    const nimOtomatis = angkaEmail ? '2251504' + angkaEmail[0].padStart(8, '0').slice(-8) : '225150400111024'
-
-    const userLokal = {
-      id_user: 'USR-MHS',
-      nama: namaFormatted || 'Mahasiswa UB',
-      email: emailBersih,
-      role: 'MAHASISWA',
-      nim: nimOtomatis,
-      nomor_telepon: '081234567890',
-      program_studi: 'Teknik Informatika',
-      fakultas: 'Fakultas Ilmu Komputer',
+    // Jika pengguna memiliki password_hash, verifikasi dengan SHA-512 + Salt email
+    if (data.password_hash) {
+      const cocok = await verifikasiPassword(passwordInput, data.password_hash, emailBersih)
+      if (!cocok) {
+        return {
+          berhasil: false,
+          user: null,
+          pesan: 'Kata sandi salah. Silakan periksa kembali.',
+        }
+      }
     }
 
-    return { berhasil: true, user: petakanPengguna(userLokal), pesan: '' }
+    return { berhasil: true, user: petakanPengguna(data), pesan: '' }
   } catch (err) {
     console.error(err)
-    return { berhasil: false, user: null, pesan: 'Terjadi kesalahan saat masuk' }
+    return { berhasil: false, user: null, pesan: 'Terjadi kesalahan saat memproses login.' }
+  }
+}
+
+/**
+ * Mengirimkan kode OTP pendaftaran ke alamat email student UB via Supabase Auth.
+ * @param {string} email
+ * @param {string} password
+ * @returns {Promise<{berhasil: boolean, pesan: string}>}
+ */
+export async function kirimOtpPendaftaran(email, password) {
+  const emailBersih = String(email ?? '').trim().toLowerCase()
+  try {
+    const supabase = ambilSupabase()
+
+    // 1. Cek apakah email sudah terdaftar di tabel pengguna
+    const { data: cekPengguna } = await supabase
+      .from('pengguna')
+      .select('id_user')
+      .ilike('email', emailBersih)
+      .maybeSingle()
+
+    if (cekPengguna) {
+      return {
+        berhasil: false,
+        pesan: 'Email ini sudah terdaftar. Silakan langsung masuk.',
+      }
+    }
+
+    // 2. Minta Supabase Auth untuk mengirimkan email OTP
+    const { error } = await supabase.auth.signUp({
+      email: emailBersih,
+      password: password,
+    })
+
+    if (error) {
+      console.warn('Supabase signUp notice:', error.message)
+      if (error.message?.toLowerCase().includes('already registered')) {
+        const { error: otpError } = await supabase.auth.signInWithOtp({
+          email: emailBersih,
+        })
+        if (otpError) {
+          return { berhasil: false, pesan: otpError.message || 'Gagal mengirimkan kode OTP ke email Anda.' }
+        }
+      } else {
+        return { berhasil: false, pesan: error.message || 'Gagal mengirimkan kode OTP ke email Anda.' }
+      }
+    }
+
+    return {
+      berhasil: true,
+      pesan: `Kode OTP verifikasi telah dikirim ke ${emailBersih}. Silakan periksa kotak masuk atau spam email Anda.`,
+    }
+  } catch (err) {
+    console.error('kirimOtpPendaftaran error:', err)
+    return { berhasil: false, pesan: 'Terjadi kesalahan saat mengirim OTP ke email.' }
+  }
+}
+
+/**
+ * Verifikasi kode OTP dan simpan data mahasiswa ke database.
+ * @param {object} dataMahasiswa
+ * @param {string} kodeOtp
+ * @returns {Promise<{berhasil: boolean, user?: object, pesan: string}>}
+ */
+export async function verifikasiOtpDanDaftar(dataMahasiswa, kodeOtp) {
+  const emailBersih = String(dataMahasiswa.email ?? '').trim().toLowerCase()
+  const tokenOtp = String(kodeOtp ?? '').trim()
+
+  try {
+    const supabase = ambilSupabase()
+
+    // 1. Verifikasi kode OTP ke Supabase Auth
+    let authUser = null
+    const { data: verifData, error: verifError } = await supabase.auth.verifyOtp({
+      email: emailBersih,
+      token: tokenOtp,
+      type: 'signup',
+    })
+
+    if (verifError) {
+      // Coba alternatif tipe OTP 'email'
+      const { data: fbData, error: fbError } = await supabase.auth.verifyOtp({
+        email: emailBersih,
+        token: tokenOtp,
+        type: 'email',
+      })
+
+      if (fbError) {
+        return {
+          berhasil: false,
+          pesan: 'Kode OTP tidak valid atau sudah kedaluwarsa. Silakan periksa kembali email Anda.',
+        }
+      }
+      authUser = fbData?.user
+    } else {
+      authUser = verifData?.user
+    }
+
+    // 2. Hash kata sandi dengan SHA-512 + Salt email
+    const passHash = await hashPassword(dataMahasiswa.password, emailBersih)
+
+    // 3. Simpan data mahasiswa ke tabel `pengguna`
+    const idUserBaru = 'USR-' + Math.random().toString(36).substring(2, 9).toUpperCase()
+    const recordBaru = {
+      id_user: idUserBaru,
+      auth_id: authUser?.id || null,
+      nama: String(dataMahasiswa.nama ?? '').trim(),
+      email: emailBersih,
+      role: 'MAHASISWA',
+      nim: String(dataMahasiswa.nim ?? '').trim() || null,
+      nomor_telepon: String(dataMahasiswa.nomorTelepon ?? '').trim() || null,
+      program_studi: String(dataMahasiswa.programStudi ?? '').trim() || 'Teknik Informatika',
+      fakultas: String(dataMahasiswa.fakultas ?? '').trim() || 'Fakultas Ilmu Komputer',
+      password_hash: passHash,
+    }
+
+    const { data: inserted, error: insertError } = await supabase
+      .from('pengguna')
+      .insert(recordBaru)
+      .select()
+      .maybeSingle()
+
+    if (insertError) {
+      console.error('Gagal insert ke tabel pengguna:', insertError)
+      return {
+        berhasil: false,
+        pesan: 'Gagal menyimpan data pengguna ke database: ' + (insertError.message || ''),
+      }
+    }
+
+    return {
+      berhasil: true,
+      user: petakanPengguna(inserted || recordBaru),
+      pesan: 'Pendaftaran berhasil! Akun Anda telah aktif.',
+    }
+  } catch (err) {
+    console.error('verifikasiOtpDanDaftar error:', err)
+    return { berhasil: false, pesan: 'Terjadi kesalahan saat memverifikasi OTP.' }
   }
 }
 

@@ -342,6 +342,62 @@ code {
   margin-left: var(--space-2);
 }
 
+.masuk__kartu--lebar {
+  max-width: 520px;
+}
+
+.masuk__tautan-bawah {
+  margin-top: var(--space-4);
+  text-align: center;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-soft);
+}
+
+.masuk__tautan-bawah button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-primary);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.masuk__tautan-bawah button:hover {
+  color: var(--color-primary-hover);
+}
+
+.masuk__info-sukses {
+  width: 100%;
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--color-success-surface, #ecfdf5);
+  border: var(--border-hairline) solid var(--color-success-border, #a7f3d0);
+  color: var(--color-success, #065f46);
+  font-size: var(--text-body-sm);
+}
+
+.masuk__info-email {
+  width: 100%;
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  background: #eff6ff;
+  border: var(--border-hairline) solid #bfdbfe;
+  color: #1e40af;
+  font-size: var(--text-body-sm);
+  line-height: 1.5;
+}
+
+.masuk__input-otp {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5rem;
+  text-align: center;
+  text-transform: uppercase;
+}
+
 /* ---------- Tanggap layar ---------- */
 
 @media (max-width: 768px) {
