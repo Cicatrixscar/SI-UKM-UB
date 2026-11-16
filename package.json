@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Sistem Informasi Pendaftaran UKM Universitas Brawijaya - frontend mock-first (sprint UC003 & UC004)",
+  "description": "Sistem Informasi Pendaftaran UKM Universitas Brawijaya - frontend Supabase (sprint UC003 & UC004)",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
