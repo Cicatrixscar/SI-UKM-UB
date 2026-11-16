@@ -76,6 +76,30 @@ export function validasiEmailAdmin(email) {
   return { valid: true, pesan: '' }
 }
 
+/**
+ * Validasi kekuatan kata sandi:
+ * Minimal 8 karakter, wajib mengandung huruf kecil, huruf besar, dan angka.
+ */
+export function validasiKekuatanPassword(password) {
+  const teks = String(password ?? '')
+  if (!teks) {
+    return { valid: false, pesan: PESAN.FIELD_WAJIB }
+  }
+  if (teks.length < 8) {
+    return { valid: false, pesan: 'Kata sandi minimal 8 karakter' }
+  }
+  if (!/[a-z]/.test(teks)) {
+    return { valid: false, pesan: 'Kata sandi wajib mengandung setidaknya satu huruf kecil (a-z)' }
+  }
+  if (!/[A-Z]/.test(teks)) {
+    return { valid: false, pesan: 'Kata sandi wajib mengandung setidaknya satu huruf besar (A-Z)' }
+  }
+  if (!/[0-9]/.test(teks)) {
+    return { valid: false, pesan: 'Kata sandi wajib mengandung setidaknya satu angka (0-9)' }
+  }
+  return { valid: true, pesan: '' }
+}
+
 /** Alias untuk login mahasiswa saat ini */
 export const validasiEmailUB = validasiEmailMahasiswa
 

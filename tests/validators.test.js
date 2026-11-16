@@ -14,6 +14,7 @@ import {
   validasiEmailUB,
   validasiEmailMahasiswa,
   validasiEmailAdmin,
+  validasiKekuatanPassword,
   validasiNim,
   validasiAlasan,
   validasiDataDiri,
@@ -87,6 +88,35 @@ describe('validasiEmailAdmin', () => {
 
   it('menerima email admin berakhiran @ub.ac.id', () => {
     expect(validasiEmailAdmin('admin@ub.ac.id').valid).toBe(true)
+  })
+})
+
+describe('validasiKekuatanPassword', () => {
+  it('menolak kata sandi kosong', () => {
+    expect(validasiKekuatanPassword('').valid).toBe(false)
+  })
+
+  it('menolak kata sandi kurang dari 8 karakter', () => {
+    expect(validasiKekuatanPassword('Ab1').valid).toBe(false)
+    expect(validasiKekuatanPassword('Abcdef1').valid).toBe(false)
+  })
+
+  it('menolak kata sandi tanpa huruf kecil', () => {
+    expect(validasiKekuatanPassword('ABCDEFG123').valid).toBe(false)
+  })
+
+  it('menolak kata sandi tanpa huruf besar', () => {
+    expect(validasiKekuatanPassword('abcdefg123').valid).toBe(false)
+  })
+
+  it('menolak kata sandi tanpa angka', () => {
+    expect(validasiKekuatanPassword('Abcdefghij').valid).toBe(false)
+  })
+
+  it('menerima kata sandi yang memenuhi syarat (min 8 karakter, huruf kecil, huruf besar, angka)', () => {
+    expect(validasiKekuatanPassword('Brawijaya2026!').valid).toBe(true)
+    expect(validasiKekuatanPassword('Password123').valid).toBe(true)
+    expect(validasiKekuatanPassword('RahasiaUB1').valid).toBe(true)
   })
 })
 

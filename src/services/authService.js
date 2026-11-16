@@ -97,12 +97,24 @@ export async function kirimOtpPendaftaran(email, password) {
 
     if (error) {
       console.warn('Supabase signUp notice:', error.message)
-      if (error.message?.toLowerCase().includes('already registered')) {
-        const { error: otpError } = await supabase.auth.signInWithOtp({
+      if (
+        error.message?.toLowerCase().includes('already registered') ||
+        error.message?.toLowerCase().includes('already exists')
+      ) {
+        const { error: resendError } = await supabase.auth.resend({
+          type: 'signup',
           email: emailBersih,
         })
-        if (otpError) {
-          return { berhasil: false, pesan: otpError.message || 'Gagal mengirimkan kode OTP ke email Anda.' }
+        if (resendError) {
+          const { error: otpError } = await supabase.auth.signInWithOtp({
+            email: emailBersih,
+          })
+          if (otpError) {
+            return {
+              berhasil: false,
+              pesan: otpError.message || resendError.message || 'Gagal mengirimkan kode OTP.',
+            }
+          }
         }
       } else {
         return { berhasil: false, pesan: error.message || 'Gagal mengirimkan kode OTP ke email Anda.' }

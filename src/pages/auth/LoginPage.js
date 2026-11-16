@@ -16,7 +16,7 @@ import {
 import { setSesi } from '../../state/session.js'
 import { navigasi } from '../../router.js'
 import { config } from '../../config.js'
-import { validasiEmailMahasiswa, validasiWajib } from '../../utils/validators.js'
+import { validasiEmailMahasiswa, validasiWajib, validasiKekuatanPassword } from '../../utils/validators.js'
 import {
   buatTextField,
   nilaiTextField,
@@ -265,8 +265,8 @@ function renderDaftarMahasiswa(wadah) {
     label: 'Kata Sandi',
     nama: 'password',
     tipe: 'password',
-    placeholder: 'Minimal 6 karakter',
-    bantuan: 'Kata sandi akan diamankan dengan enkripsi hash SHA-512',
+    placeholder: 'Minimal 8 karakter (huruf besar, kecil, angka)',
+    bantuan: 'Wajib min. 8 karakter, kombinasi huruf besar, huruf kecil, dan angka. Di-hash dengan SHA-512.',
     wajib: true,
   })
 
@@ -366,16 +366,17 @@ function renderDaftarMahasiswa(wadah) {
       adaError = true
     }
 
-    if (!password) {
-      setErrorTextField(fieldSandi, 'Kata sandi wajib diisi')
-      adaError = true
-    } else if (password.length < 6) {
-      setErrorTextField(fieldSandi, 'Kata sandi minimal 6 karakter')
+    const cekSandi = validasiKekuatanPassword(password)
+    if (!cekSandi.valid) {
+      setErrorTextField(fieldSandi, cekSandi.pesan)
       adaError = true
     }
 
-    if (password !== konfirmasi) {
+    if (password && konfirmasi && password !== konfirmasi) {
       setErrorTextField(fieldKonfirmasi, 'Konfirmasi kata sandi tidak cocok')
+      adaError = true
+    } else if (!konfirmasi) {
+      setErrorTextField(fieldKonfirmasi, 'Konfirmasi kata sandi wajib diisi')
       adaError = true
     }
 
