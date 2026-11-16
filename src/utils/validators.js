@@ -15,7 +15,8 @@ import { PESAN } from './errors.js'
 import { batasUkuranFile, batasKarakterAlasan, formatFileDiizinkan } from '../config.js'
 
 const EMAIL_SAH = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const EMAIL_UB_SAH = /^[a-zA-Z0-9._%+-]+@([a-zA-Z0-9-]+\.)*ub\.ac\.id$/i
+const EMAIL_STUDENT_UB = /^[a-zA-Z0-9._%+-]+@student\.ub\.ac\.id$/i
+const EMAIL_ADMIN_UB = /^[a-zA-Z0-9._%+-]+@ub\.ac\.id$/i
 
 /**
  * Cek field wajib terisi.
@@ -44,20 +45,39 @@ export function validasiEmail(email) {
 }
 
 /**
- * Cek format email khusus domain UB (@ub.ac.id atau @student.ub.ac.id).
- * Digunakan pada saat masuk/login.
+ * Cek format email khusus Mahasiswa.
+ * Wajib berakhiran @student.ub.ac.id (contoh: akumahasiswa@student.ub.ac.id).
  */
-export function validasiEmailUB(email) {
+export function validasiEmailMahasiswa(email) {
   const teks = String(email ?? '').trim()
   if (!teks) return { valid: false, pesan: PESAN.FIELD_WAJIB }
-  if (!EMAIL_SAH.test(teks) || !EMAIL_UB_SAH.test(teks)) {
+  if (!EMAIL_SAH.test(teks) || !EMAIL_STUDENT_UB.test(teks)) {
     return {
       valid: false,
-      pesan: 'Email wajib berakhiran ub.ac.id atau student.ub.ac.id (contoh: ascaryahaldis03@student.ub.ac.id / admin@ub.ac.id)',
+      pesan: 'Email mahasiswa wajib berakhiran @student.ub.ac.id (contoh: akumahasiswa@student.ub.ac.id)',
     }
   }
   return { valid: true, pesan: '' }
 }
+
+/**
+ * Cek format email khusus Admin UKM.
+ * Wajib berakhiran @ub.ac.id (contoh: admin@ub.ac.id).
+ */
+export function validasiEmailAdmin(email) {
+  const teks = String(email ?? '').trim()
+  if (!teks) return { valid: false, pesan: PESAN.FIELD_WAJIB }
+  if (!EMAIL_SAH.test(teks) || !EMAIL_ADMIN_UB.test(teks)) {
+    return {
+      valid: false,
+      pesan: 'Email admin wajib berakhiran @ub.ac.id (contoh: admin@ub.ac.id)',
+    }
+  }
+  return { valid: true, pesan: '' }
+}
+
+/** Alias untuk login mahasiswa saat ini */
+export const validasiEmailUB = validasiEmailMahasiswa
 
 /**
  * Cek NIM.

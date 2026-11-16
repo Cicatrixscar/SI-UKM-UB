@@ -12,6 +12,8 @@ import {
   validasiWajib,
   validasiEmail,
   validasiEmailUB,
+  validasiEmailMahasiswa,
+  validasiEmailAdmin,
   validasiNim,
   validasiAlasan,
   validasiDataDiri,
@@ -60,22 +62,31 @@ describe('validasiEmail', () => {
   })
 })
 
-describe('validasiEmailUB', () => {
+describe('validasiEmailMahasiswa', () => {
   it('menolak email kosong', () => {
-    expect(validasiEmailUB('').valid).toBe(false)
+    expect(validasiEmailMahasiswa('').valid).toBe(false)
   })
 
-  it('menolak email di luar domain ub.ac.id / student.ub.ac.id', () => {
-    expect(validasiEmailUB('user@gmail.com').valid).toBe(false)
-    expect(validasiEmailUB('user@yahoo.co.id').valid).toBe(false)
-    expect(validasiEmailUB('user@ub.ac.id.evil.com').valid).toBe(false)
+  it('menolak email di luar domain @student.ub.ac.id', () => {
+    expect(validasiEmailMahasiswa('user@gmail.com').valid).toBe(false)
+    expect(validasiEmailMahasiswa('admin@ub.ac.id').valid).toBe(false)
+    expect(validasiEmailMahasiswa('user@student.ub.ac.id.evil.com').valid).toBe(false)
   })
 
-  it('menerima email berakhiran ub.ac.id atau student.ub.ac.id', () => {
-    expect(validasiEmailUB('ascaryahaldis03@student.ub.ac.id').valid).toBe(true)
-    expect(validasiEmailUB('admin@ub.ac.id').valid).toBe(true)
-    expect(validasiEmailUB('rusdi@student.ub.ac.id').valid).toBe(true)
-    expect(validasiEmailUB('dosen@filkom.ub.ac.id').valid).toBe(true)
+  it('menerima email mahasiswa berakhiran @student.ub.ac.id', () => {
+    expect(validasiEmailMahasiswa('akumahasiswa@student.ub.ac.id').valid).toBe(true)
+    expect(validasiEmailMahasiswa('rusdi@student.ub.ac.id').valid).toBe(true)
+  })
+})
+
+describe('validasiEmailAdmin', () => {
+  it('menolak email selain @ub.ac.id', () => {
+    expect(validasiEmailAdmin('akumahasiswa@student.ub.ac.id').valid).toBe(false)
+    expect(validasiEmailAdmin('admin@gmail.com').valid).toBe(false)
+  })
+
+  it('menerima email admin berakhiran @ub.ac.id', () => {
+    expect(validasiEmailAdmin('admin@ub.ac.id').valid).toBe(true)
   })
 })
 

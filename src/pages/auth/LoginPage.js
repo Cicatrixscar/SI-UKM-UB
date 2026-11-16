@@ -10,7 +10,7 @@ import { login } from '../../services/authService.js'
 import { setSesi } from '../../state/session.js'
 import { navigasi } from '../../router.js'
 import { config } from '../../config.js'
-import { validasiEmailUB, validasiWajib } from '../../utils/validators.js'
+import { validasiEmailMahasiswa, validasiWajib } from '../../utils/validators.js'
 import {
   buatTextField,
   nilaiTextField,
@@ -60,7 +60,7 @@ function renderFormMahasiswa(wadah) {
         </button>
         ${logo()}
         <h1 class="masuk__judul">Masuk sebagai Mahasiswa</h1>
-        <p class="masuk__subjudul text-muted">Gunakan akun resmi Universitas Brawijaya</p>
+        <p class="masuk__subjudul text-muted">Gunakan akun email @student.ub.ac.id</p>
 
         <form class="masuk__form" novalidate data-form></form>
       </div>
@@ -73,8 +73,8 @@ function renderFormMahasiswa(wadah) {
     label: 'Email Mahasiswa UB',
     nama: 'email',
     tipe: 'email',
-    placeholder: 'contoh: ascaryahaldis03@student.ub.ac.id',
-    bantuan: 'Wajib berakhiran ub.ac.id atau student.ub.ac.id',
+    placeholder: 'contoh: akumahasiswa@student.ub.ac.id',
+    bantuan: 'Wajib berakhiran @student.ub.ac.id',
     wajib: true,
     autocomplete: 'username',
   })
@@ -119,8 +119,8 @@ function renderFormMahasiswa(wadah) {
     const email = nilaiTextField(fieldEmail).trim()
     const password = nilaiTextField(fieldSandi)
 
-    // Validasi format email domain UB
-    const cekEmail = validasiEmailUB(email)
+    // Validasi format email domain mahasiswa UB (@student.ub.ac.id)
+    const cekEmail = validasiEmailMahasiswa(email)
     if (!cekEmail.valid) {
       setErrorTextField(fieldEmail, cekEmail.pesan)
       return

@@ -20,21 +20,23 @@ import { logout as logoutPengguna } from '../models/Pengguna.js'
 
 /** @returns {Promise<{berhasil: boolean, user: object|null, pesan: string}>} */
 export async function login(email, pass) {
-  // `pass` sengaja tidak dipakai — lihat catatan shortcut di atas.
+  // `pass` sengaja tidak diverifikasi — mode demo frontend
   void pass
   const emailBersih = String(email ?? '').trim().toLowerCase()
   try {
+    // Cari data pengguna yang sudah terdaftar di Supabase
     const { data, error } = await ambilSupabase()
       .from('pengguna')
       .select('*')
       .ilike('email', emailBersih)
       .maybeSingle()
     pastikan(error)
+
     if (data) {
       return { berhasil: true, user: petakanPengguna(data), pesan: '' }
     }
 
-    // Jika akun belum terdaftar di tabel pengguna Supabase, buatkan profil mahasiswa otomatis
+    // Jika belum ada di tabel pengguna, buat objek sesi lokal saja tanpa mencatat/mengubah database
     const namaPrefix = emailBersih.split('@')[0]
     const namaFormatted = namaPrefix
       .replace(/[._0-9]/g, ' ')
@@ -47,8 +49,8 @@ export async function login(email, pass) {
     const angkaEmail = emailBersih.match(/\d+/)
     const nimOtomatis = angkaEmail ? '2251504' + angkaEmail[0].padStart(8, '0').slice(-8) : '225150400111024'
 
-    const userBaru = {
-      id_user: 'USR-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
+    const userLokal = {
+      id_user: 'USR-MHS',
       nama: namaFormatted || 'Mahasiswa UB',
       email: emailBersih,
       role: 'MAHASISWA',
@@ -58,20 +60,7 @@ export async function login(email, pass) {
       fakultas: 'Fakultas Ilmu Komputer',
     }
 
-    try {
-      const { data: inserted } = await ambilSupabase()
-        .from('pengguna')
-        .insert(userBaru)
-        .select()
-        .maybeSingle()
-      if (inserted) {
-        return { berhasil: true, user: petakanPengguna(inserted), pesan: '' }
-      }
-    } catch {
-      // Abaikan jika database membatasi izin insert anon
-    }
-
-    return { berhasil: true, user: petakanPengguna(userBaru), pesan: '' }
+    return { berhasil: true, user: petakanPengguna(userLokal), pesan: '' }
   } catch (err) {
     console.error(err)
     return { berhasil: false, user: null, pesan: 'Terjadi kesalahan saat masuk' }
