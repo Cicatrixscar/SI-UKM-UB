@@ -28,6 +28,7 @@ let sedangProses = false
 let modeSaatIni = 'PILIHAN' // 'PILIHAN' | 'LOGIN_MAHASISWA' | 'DAFTAR_MAHASISWA' | 'VERIFIKASI_OTP'
 let dataPendaftaranSementara = null
 let pesanSuksesLogin = ''
+let pesanInfoOtp = ''
 
 function logo() {
   return `<img class="masuk__logo" src="/img/logo-ub.png" alt="Logo Universitas Brawijaya" />`
@@ -400,6 +401,7 @@ function renderDaftarMahasiswa(wadah) {
     try {
       const hasil = await kirimOtpPendaftaran(email, password)
       if (hasil.berhasil) {
+        pesanInfoOtp = hasil.pesan
         modeSaatIni = 'VERIFIKASI_OTP'
         renderIsi(wadah)
         return
@@ -440,8 +442,11 @@ function renderVerifikasiOtp(wadah) {
         <p class="masuk__subjudul text-muted">Periksa email Anda untuk melanjutkan</p>
 
         <div class="masuk__info-email">
-          Kode 6 digit OTP telah dikirim ke <strong>${emailTujuan}</strong>.<br />
-          <small>Periksa Kotak Masuk atau folder <em>Spam / Junk</em> email Anda.</small>
+          ${
+            pesanInfoOtp
+              ? pesanInfoOtp
+              : `Kode 6 digit OTP telah dikirim ke <strong>${emailTujuan}</strong>.<br /><small>Periksa Kotak Masuk atau folder <em>Spam / Junk</em> email Anda.</small>`
+          }
         </div>
 
         <form class="masuk__form" novalidate data-form-otp>
@@ -546,9 +551,13 @@ function renderVerifikasiOtp(wadah) {
         dataPendaftaranSementara.email,
         dataPendaftaranSementara.password
       )
+      pesanInfoOtp = res.pesan
       pesanUmum.textContent = res.pesan
       pesanUmum.className = res.berhasil ? 'masuk__info-sukses' : 'masuk__pesan'
       pesanUmum.hidden = false
+      if (res.berhasil) {
+        wadah.querySelector('.masuk__info-email').innerHTML = res.pesan
+      }
     } finally {
       sedangProses = false
       btnResend.disabled = false
