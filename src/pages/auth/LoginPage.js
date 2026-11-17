@@ -442,21 +442,21 @@ function renderVerifikasiOtp(wadah) {
         <p class="masuk__subjudul text-muted">Periksa email Anda untuk melanjutkan</p>
 
         <div class="masuk__info-email">
-          Kode 6 digit OTP telah dikirim ke <strong>${emailTujuan}</strong>.<br />
+          Kode OTP verifikasi telah dikirim ke <strong>${emailTujuan}</strong>.<br />
           <small>Silakan periksa Kotak Masuk atau folder <em>Spam / Junk</em> email UB Anda.</small>
         </div>
 
         <form class="masuk__form" novalidate data-form-otp>
           <div class="field" data-field="otp">
-            <label class="field__label" for="input-otp">Masukkan 6 Digit Kode OTP <span class="field__wajib">*</span></label>
+            <label class="field__label" for="input-otp">Masukkan Kode OTP Verifikasi <span class="field__wajib">*</span></label>
             <input
               class="field__input masuk__input-otp"
               id="input-otp"
               name="otp"
               type="text"
               inputmode="numeric"
-              maxlength="6"
-              placeholder="123456"
+              maxlength="12"
+              placeholder="contoh: 34602441"
               autocomplete="one-time-code"
               required
             />
@@ -504,7 +504,7 @@ function renderVerifikasiOtp(wadah) {
     const kode = inputOtp.value.trim()
 
     if (!kode || kode.length < 6) {
-      errorOtp.textContent = 'Masukkan 6 digit kode OTP yang valid'
+      errorOtp.textContent = 'Masukkan kode OTP verifikasi yang valid'
       errorOtp.hidden = false
       return
     }
