@@ -66,11 +66,10 @@ export async function login(email, pass) {
 
 /**
  * Mengirimkan kode OTP pendaftaran ke alamat email student UB via Supabase Auth.
- * Jika server SMTP eksternal mengalami kendala jaringan, otomatis menyediakan kode OTP cadangan
- * agar alur pengujian pendaftaran tidak terhambat.
+ * Kode OTP dikirimkan secara ketat ke kotak masuk email asli pengguna.
  * @param {string} email
  * @param {string} password
- * @returns {Promise<{berhasil: boolean, otpLokal?: string, pesan: string}>}
+ * @returns {Promise<{berhasil: boolean, pesan: string}>}
  */
 export async function kirimOtpPendaftaran(email, password) {
   const emailBersih = String(email ?? '').trim().toLowerCase()
@@ -91,10 +90,7 @@ export async function kirimOtpPendaftaran(email, password) {
       }
     }
 
-    // 2. Coba kirim via Supabase Auth (memicu template SMTP)
-    let kendalaSmtp = false
-    let pesanErrorSmtp = ''
-
+    // 2. Kirim OTP via Supabase Auth ke email asli
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email: emailBersih,
       options: {
@@ -103,51 +99,37 @@ export async function kirimOtpPendaftaran(email, password) {
     })
 
     if (otpError) {
-      console.warn('signInWithOtp notice:', otpError.message)
+      console.warn('signInWithOtp error, mencoba signUp:', otpError.message)
       const { error: signUpError } = await supabase.auth.signUp({
         email: emailBersih,
         password: password,
       })
 
       if (signUpError) {
-        console.warn('signUp error:', signUpError.message)
-        kendalaSmtp = true
-        pesanErrorSmtp = signUpError.message || otpError.message
-      }
-    }
-
-    // 3. Jika SMTP mengalami kendala pengiriman (mis. port/sandi SMTP Google),
-    // aktifkan fallback kode OTP 6-digit agar pengujian tetap berhasil 100%
-    if (kendalaSmtp) {
-      const kodeCadangan = Math.floor(100000 + Math.random() * 900000).toString()
-      sessionStorage.setItem('otp_aktif_' + emailBersih, kodeCadangan)
-
-      return {
-        berhasil: true,
-        otpLokal: kodeCadangan,
-        pesan: `Server SMTP sedang terkendala (${pesanErrorSmtp}). Kode OTP verifikasi Anda: [ ${kodeCadangan} ]`,
+        console.error('Gagal kirim email OTP:', signUpError)
+        return {
+          berhasil: false,
+          pesan: signUpError.message || otpError.message || 'Gagal mengirimkan kode OTP ke email Anda.',
+        }
       }
     }
 
     return {
       berhasil: true,
-      pesan: `Kode OTP verifikasi telah dikirim ke ${emailBersih}. Silakan periksa kotak masuk atau spam email Anda.`,
+      pesan: `Kode OTP verifikasi telah dikirim ke ${emailBersih}. Silakan periksa kotak masuk atau folder spam email Anda.`,
     }
   } catch (err) {
     console.error('kirimOtpPendaftaran error:', err)
-    // Fallback darurat
-    const kodeCadangan = Math.floor(100000 + Math.random() * 900000).toString()
-    sessionStorage.setItem('otp_aktif_' + emailBersih, kodeCadangan)
     return {
-      berhasil: true,
-      otpLokal: kodeCadangan,
-      pesan: `Kode OTP verifikasi pendaftaran Anda: [ ${kodeCadangan} ]`,
+      berhasil: false,
+      pesan: 'Terjadi kesalahan pada server saat mengirim email verifikasi.',
     }
   }
 }
 
 /**
  * Verifikasi kode OTP dan simpan data mahasiswa ke database.
+ * Kode OTP diverifikasi secara ketat ke Supabase Auth.
  * @param {object} dataMahasiswa
  * @param {string} kodeOtp
  * @returns {Promise<{berhasil: boolean, user?: object, pesan: string}>}
@@ -159,43 +141,30 @@ export async function verifikasiOtpDanDaftar(dataMahasiswa, kodeOtp) {
   try {
     const supabase = ambilSupabase()
 
-    // 1. Verifikasi kode OTP: Cek apakah cocok dengan OTP cadangan sistem atau Supabase Auth
-    const otpCadangan = sessionStorage.getItem('otp_aktif_' + emailBersih)
+    // 1. Verifikasi kode OTP secara ketat ke server Supabase Auth
     let authUser = null
-    let otpValid = false
+    const { data: fbData, error: fbError } = await supabase.auth.verifyOtp({
+      email: emailBersih,
+      token: tokenOtp,
+      type: 'email',
+    })
 
-    if (otpCadangan && otpCadangan === tokenOtp) {
-      otpValid = true
-      sessionStorage.removeItem('otp_aktif_' + emailBersih)
-    } else {
-      // Coba verifikasi ke Supabase Auth
-      const { data: fbData, error: fbError } = await supabase.auth.verifyOtp({
+    if (fbError) {
+      const { data: verifData, error: verifError } = await supabase.auth.verifyOtp({
         email: emailBersih,
         token: tokenOtp,
-        type: 'email',
+        type: 'signup',
       })
 
-      if (!fbError) {
-        otpValid = true
-        authUser = fbData?.user
-      } else {
-        const { data: verifData, error: verifError } = await supabase.auth.verifyOtp({
-          email: emailBersih,
-          token: tokenOtp,
-          type: 'signup',
-        })
-        if (!verifError) {
-          otpValid = true
-          authUser = verifData?.user
+      if (verifError) {
+        return {
+          berhasil: false,
+          pesan: 'Kode OTP tidak valid atau salah. Silakan periksa kembali email Anda.',
         }
       }
-    }
-
-    if (!otpValid) {
-      return {
-        berhasil: false,
-        pesan: 'Kode OTP tidak valid atau salah. Silakan periksa kembali kode OTP Anda.',
-      }
+      authUser = verifData?.user
+    } else {
+      authUser = fbData?.user
     }
 
     // 2. Hash kata sandi dengan SHA-512 + Salt email

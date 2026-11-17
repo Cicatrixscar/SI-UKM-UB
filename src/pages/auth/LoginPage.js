@@ -442,11 +442,8 @@ function renderVerifikasiOtp(wadah) {
         <p class="masuk__subjudul text-muted">Periksa email Anda untuk melanjutkan</p>
 
         <div class="masuk__info-email">
-          ${
-            pesanInfoOtp
-              ? pesanInfoOtp
-              : `Kode 6 digit OTP telah dikirim ke <strong>${emailTujuan}</strong>.<br /><small>Periksa Kotak Masuk atau folder <em>Spam / Junk</em> email Anda.</small>`
-          }
+          Kode 6 digit OTP telah dikirim ke <strong>${emailTujuan}</strong>.<br />
+          <small>Silakan periksa Kotak Masuk atau folder <em>Spam / Junk</em> email UB Anda.</small>
         </div>
 
         <form class="masuk__form" novalidate data-form-otp>
