@@ -17,6 +17,9 @@ create policy "tulis dokumen" on dokumen_pendaftaran
 create policy "ubah notifikasi" on notifikasi
   for update to anon, authenticated using (true) with check (true);
 
+create policy "ubah pengguna" on pengguna
+  for update to anon, authenticated using (true) with check (true);
+
 -- ---------- Storage: bucket berkas pendaftaran ----------
 insert into storage.buckets (id, name, public)
 values ('dokumen', 'dokumen', true)

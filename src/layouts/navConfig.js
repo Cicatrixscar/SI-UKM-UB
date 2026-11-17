@@ -41,4 +41,9 @@ export const menuMahasiswa = Object.freeze([
     jalur: '/mahasiswa/notifikasi',
     halaman: () => import('../pages/mahasiswa/NotifikasiPage.js'),
   }),
+  Object.freeze({
+    label: 'Profil',
+    jalur: '/mahasiswa/profil',
+    halaman: () => import('../pages/mahasiswa/ProfilPage.js'),
+  }),
 ])

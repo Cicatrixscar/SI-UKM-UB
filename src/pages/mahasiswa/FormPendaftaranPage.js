@@ -25,15 +25,15 @@ import { KODE_DOKUMEN } from '../../models/PersyaratanDokumen.js'
 const drafPendaftaran = {}
 
 function getDraf(idUKM) {
+  const sesi = getSesi()
   if (!drafPendaftaran[idUKM]) {
-    const sesi = getSesi()
     drafPendaftaran[idUKM] = {
       dataDiri: {
-        nama: sesi?.nama ?? 'Rusdi',
-        nim: sesi?.nim ?? '255150400111024',
-        email: sesi?.email ?? 'rusdi@student.ub.ac.id',
-        nomorTelepon: sesi?.nomorTelepon ?? '0812 3456 7890',
-        alasan: 'Saya ingin mengembangkan kemampuan fotografi dan belajar bercerita melalui gambar. Saya pernah menjadi anggota tim dokumentasi acara sekolah dan ingin berkontribusi dalam kegiatan kampus.',
+        nama: sesi?.nama ?? '',
+        nim: sesi?.nim ?? '',
+        email: sesi?.email ?? '',
+        nomorTelepon: sesi?.nomorTelepon ?? '',
+        alasan: '',
       },
       berkas: {
         [KODE_DOKUMEN.KTM]: null,
@@ -42,6 +42,12 @@ function getDraf(idUKM) {
       },
       pernyataanBenar: false,
     }
+  } else {
+    // Sinkronkan selalu data identitas dengan profil akun sesi saat ini
+    drafPendaftaran[idUKM].dataDiri.nama = sesi?.nama ?? drafPendaftaran[idUKM].dataDiri.nama
+    drafPendaftaran[idUKM].dataDiri.nim = sesi?.nim ?? drafPendaftaran[idUKM].dataDiri.nim
+    drafPendaftaran[idUKM].dataDiri.email = sesi?.email ?? drafPendaftaran[idUKM].dataDiri.email
+    drafPendaftaran[idUKM].dataDiri.nomorTelepon = sesi?.nomorTelepon ?? drafPendaftaran[idUKM].dataDiri.nomorTelepon
   }
   return drafPendaftaran[idUKM]
 }
@@ -79,30 +85,33 @@ function renderLangkahDataDiri(wadah, ukm, draf) {
     </div>
 
     <form class="form-kartu" id="form-data-diri" novalidate>
-      <p class="form-kartu__catatan">Kolom bertanda * wajib diisi. Gunakan data sesuai identitas mahasiswa.</p>
+      <p class="form-kartu__catatan">
+        Data diri diambil otomatis dari profil akun Anda. Ingin mengubah data identitas? 
+        <a href="#/mahasiswa/profil" style="color: var(--color-primary); font-weight: 600; text-decoration: underline;">Ubah di Menu Profil</a>.
+      </p>
 
       <div class="form-grid-2">
         <div class="field" data-field="nama">
           <label class="field__label" for="inp-nama">Nama Lengkap<span class="field__wajib" aria-hidden="true">*</span></label>
-          <input class="field__input" id="inp-nama" name="nama" type="text" value="${data.nama ?? ''}" required />
+          <input class="field__input field__input--readonly" id="inp-nama" name="nama" type="text" value="${data.nama ?? ''}" readonly required />
           <p class="field__error" id="err-nama" role="alert" hidden></p>
         </div>
 
         <div class="field" data-field="nim">
           <label class="field__label" for="inp-nim">NIM<span class="field__wajib" aria-hidden="true">*</span></label>
-          <input class="field__input" id="inp-nim" name="nim" type="text" value="${data.nim ?? ''}" required />
+          <input class="field__input field__input--readonly" id="inp-nim" name="nim" type="text" value="${data.nim ?? ''}" readonly required />
           <p class="field__error" id="err-nim" role="alert" hidden></p>
         </div>
 
         <div class="field" data-field="email">
           <label class="field__label" for="inp-email">Email<span class="field__wajib" aria-hidden="true">*</span></label>
-          <input class="field__input" id="inp-email" name="email" type="email" value="${data.email ?? ''}" required />
+          <input class="field__input field__input--readonly" id="inp-email" name="email" type="email" value="${data.email ?? ''}" readonly required />
           <p class="field__error" id="err-email" role="alert" hidden></p>
         </div>
 
         <div class="field" data-field="nomorTelepon">
           <label class="field__label" for="inp-telp">Nomor Telepon<span class="field__wajib" aria-hidden="true">*</span></label>
-          <input class="field__input" id="inp-telp" name="nomorTelepon" type="tel" value="${data.nomorTelepon ?? ''}" required />
+          <input class="field__input field__input--readonly" id="inp-telp" name="nomorTelepon" type="tel" value="${data.nomorTelepon ?? ''}" readonly required />
           <p class="field__error" id="err-telp" role="alert" hidden></p>
         </div>
       </div>
@@ -110,7 +119,7 @@ function renderLangkahDataDiri(wadah, ukm, draf) {
       <div class="form-baris-penuh">
         <div class="field" data-field="alasan">
           <label class="field__label" for="inp-alasan">Alasan bergabung / pengalaman organisasi<span class="field__wajib" aria-hidden="true">*</span></label>
-          <textarea class="field__textarea" id="inp-alasan" name="alasan" rows="4" maxlength="600" required>${data.alasan ?? ''}</textarea>
+          <textarea class="field__textarea" id="inp-alasan" name="alasan" rows="4" maxlength="600" placeholder="Tuliskan alasan, minat, dan pengalaman Anda untuk bergabung dengan UKM ini..." required>${data.alasan ?? ''}</textarea>
           <div class="form-alasan__bawah">
             <span>Ceritakan minat dan pengalamanmu secara singkat.</span>
             <span class="form-alasan__counter" id="counter-alasan">${(data.alasan ?? '').length}/500 karakter</span>

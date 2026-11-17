@@ -57,12 +57,11 @@ export function pasang(el, opsi = {}) {
             <svg class="ikon" aria-hidden="true"><use href="#i-bell"></use></svg>
             <span class="nav__lencana" aria-hidden="true" data-lencana-notifikasi hidden>0</span>
           </a>
-          <div class="nav__pengguna">
+          <a class="nav__pengguna" href="#/mahasiswa/profil" title="Lihat dan ubah profil">
             <span class="nav__avatar" aria-hidden="true">${inisialDariNama(nama)}</span>
             <span class="nav__nama">${nama}</span>
-            <svg class="ikon ikon--kecil" aria-hidden="true"><use href="#i-chevron-down"></use></svg>
-            <button class="nav__keluar" type="button" data-keluar>Keluar</button>
-          </div>
+          </a>
+          <button class="nav__keluar" type="button" data-keluar title="Keluar dari akun">Keluar</button>
         </div>
       </div>
     </header>
