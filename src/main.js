@@ -18,9 +18,30 @@ document.title = `${config.namaAplikasi} · ${config.institusi}`
 
 tambahRute({
   jalur: '/',
-  judul: 'Masuk',
+  judul: 'Pilih Peran',
   perluLogin: false,
-  halaman: () => import('./pages/auth/LoginPage.js'),
+  halaman: () => import('./pages/auth/PilihPeranPage.js'),
+})
+
+tambahRute({
+  jalur: '/masuk',
+  judul: 'Masuk Mahasiswa',
+  perluLogin: false,
+  halaman: () => import('./pages/auth/LoginMahasiswaPage.js'),
+})
+
+tambahRute({
+  jalur: '/daftar',
+  judul: 'Pendaftaran Akun',
+  perluLogin: false,
+  halaman: () => import('./pages/auth/DaftarMahasiswaPage.js'),
+})
+
+tambahRute({
+  jalur: '/daftar/otp',
+  judul: 'Verifikasi OTP',
+  perluLogin: false,
+  halaman: () => import('./pages/auth/VerifikasiOtpPage.js'),
 })
 
 // Rute menu Mahasiswa (navConfig.js) — Katalog, Riwayat, Hasil Seleksi,
