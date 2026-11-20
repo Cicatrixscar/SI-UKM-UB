@@ -101,16 +101,13 @@ export function formatTanggalWaktu(iso) {
 }
 
 /**
- * Sisa waktu menuju `iso` dari acuan jam demo, mis. "5 hari 3 jam".
- * [DOKUMEN] Desain Hi-Fi kartu katalog: "Tutup dalam 5 hari 3 jam"; kartu
- *           status detail: "Sisa waktu pendaftaran — 5 hari 3 jam".
- * [USULAN] PRD tidak memuat countdown; jam acuan memakai `config.tanggalDemo`
- *          agar data dummy statis (G501) tetap koheren.
+ * Sisa waktu menuju `iso` dari waktu sekarang (atau acuan yang ditentukan), mis. "10 hari 9 jam".
+ * Dihitung dinamis dan faktual terhadap waktu perangkat (real-time).
  * @param {string} iso
- * @param {string} [acuan] ISO acuan; default `config.tanggalDemo`
- * @returns {string} contoh "5 hari 3 jam", "3 jam", "20 menit", "sudah ditutup"
+ * @param {string|Date} [acuan] waktu acuan; default `new Date()` (faktual saat ini)
+ * @returns {string} contoh "10 hari 9 jam", "3 jam", "20 menit", "sudah ditutup"
  */
-export function formatSisaWaktu(iso, acuan = config.tanggalDemo) {
+export function formatSisaWaktu(iso, acuan = new Date()) {
   if (!iso) return '-'
   const target = new Date(iso).getTime()
   const dasar = new Date(acuan).getTime()

@@ -7,7 +7,7 @@
 -- disambungkan. Ganti ke auth.uid() sebelum dipakai dengan data asli.
 -- =============================================================================
 
--- ---------- Tabel: izin tulis ----------
+-- ---------- Tabel: izin tulis & pembaruan data ----------
 create policy "tulis pendaftaran" on pendaftaran
   for insert to anon, authenticated with check (true);
 
@@ -19,6 +19,14 @@ create policy "ubah notifikasi" on notifikasi
 
 create policy "ubah pengguna" on pengguna
   for update to anon, authenticated using (true) with check (true);
+
+create policy "ubah ukm" on ukm
+  for update to anon, authenticated using (true) with check (true);
+
+-- Pembaruan tanggal tutup pendaftaran UKM yang DIBUKA ke 30 November 2026
+update ukm
+set tanggal_tutup = '2026-11-30T23:59:00+07:00'
+where status_pendaftaran = 'DIBUKA';
 
 -- ---------- Storage: bucket berkas pendaftaran ----------
 insert into storage.buckets (id, name, public)

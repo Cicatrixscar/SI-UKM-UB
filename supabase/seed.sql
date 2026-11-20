@@ -22,7 +22,7 @@ insert into persyaratan_dokumen (kode, nama, deskripsi, wajib) values
 on conflict (kode) do nothing;
 
 -- ---------- UKM ----------
--- Periode DIBUKA  : 15 Okt 2026 00.00 – 30 Okt 2026 23.59
+-- Periode DIBUKA  : 15 Okt 2026 00.00 – 30 Nov 2026 23.59
 -- Periode DITUTUP : 1 Okt 2026 00.00 – 20 Okt 2026 23.59
 insert into ukm (id_ukm, nama_ukm, id_kategori, deskripsi, visi_misi, email_ukm, icon, foto,
                  status_pendaftaran, status_verifikasi, tanggal_buka, tanggal_tutup,
@@ -31,7 +31,7 @@ insert into ukm (id_ukm, nama_ukm, id_kategori, deskripsi, visi_misi, email_ukm,
    'Belajar menangkap cerita melalui lensa dan karya fotografi.',
    'UKM Fotografi adalah ruang belajar dan berkarya bagi mahasiswa yang tertarik pada seni visual. Melalui kelas dasar, berburu foto, pameran, dan dokumentasi kegiatan kampus, kamu dapat mengembangkan teknik sekaligus menemukan sudut pandang baru.',
    'fotografi@ukm.ub.ac.id', 'i-camera', '/img/ukm-fotografi.jpg',
-   'DIBUKA', 'TERVERIFIKASI', '2026-10-15T00:00:00+07:00', '2026-10-30T23:59:00+07:00',
+   'DIBUKA', 'TERVERIFIKASI', '2026-10-15T00:00:00+07:00', '2026-11-30T23:59:00+07:00',
    jsonb_build_object(
      'kontak',       'Nadia · 0812 3456 7890',
      'grupWA',       'Grup WhatsApp: Fotografi 2026',
@@ -44,31 +44,31 @@ insert into ukm (id_ukm, nama_ukm, id_kategori, deskripsi, visi_misi, email_ukm,
    'Asah kemampuan, kekompakan tim, dan semangat kompetisi.',
    'UKM Basket mempertemukan mahasiswa yang senang bermain dan menonton bola basket. Latihan rutin, liga internal, dan pertandingan antar-fakultas menjadi ruang untuk melatih fisik, kerja sama tim, dan sportivitas.',
    'basket@ukm.ub.ac.id', 'i-basketball', '/img/ukm-basket.jpg',
-   'DIBUKA', 'TERVERIFIKASI', '2026-10-15T00:00:00+07:00', '2026-10-30T23:59:00+07:00', null),
+   'DIBUKA', 'TERVERIFIKASI', '2026-10-15T00:00:00+07:00', '2026-11-30T23:59:00+07:00', null),
 
   ('UKM-PADUANSUARA', 'UKM Paduan Suara', 'KAT-SENI',
    'Satukan suara dan tampil di panggung bersama tim kampus.',
    'UKM Paduan Suara melatih vokal, penampilan panggung, dan kekompakan kor. Kegiatan rutin meliputi latihan teknik vokal, rekaman, dan penampilan pada kegiatan universitas serta kompetisi paduan suara nasional.',
    'paduansuara@ukm.ub.ac.id', 'i-music', '/img/ukm-paduan-suara.jpg',
-   'DIBUKA', 'TERVERIFIKASI', '2026-10-15T00:00:00+07:00', '2026-10-30T23:59:00+07:00', null),
+   'DIBUKA', 'TERVERIFIKASI', '2026-10-15T00:00:00+07:00', '2026-11-30T23:59:00+07:00', null),
 
   ('UKM-PECINTAALAM', 'UKM Pecinta Alam', 'KAT-ALAM',
    'Jelajahi alam dan berkontribusi dalam kegiatan konservasi.',
    'UKM Pecinta Alam membawa mahasiswa mengenal alam sekaligus menjaganya. Kegiatan meliputi pelatihan dasar pendakian, ekspedisi, penanaman pohon, dan edukasi konservasi bersama komunitas sekitar kampus.',
    'pecintaalam@ukm.ub.ac.id', 'i-mountain', '/img/ukm-pecinta-alam.jpg',
-   'DIBUKA', 'TERVERIFIKASI', '2026-10-15T00:00:00+07:00', '2026-10-30T23:59:00+07:00', null),
+   'DIBUKA', 'TERVERIFIKASI', '2026-10-15T00:00:00+07:00', '2026-11-30T23:59:00+07:00', null),
 
   ('UKM-TEATER', 'UKM Teater', 'KAT-SENI',
    'Kembangkan ekspresi, akting, dan kreativitas di atas panggung.',
    'UKM Teater adalah ruang eksplorasi seni pertunjukan bagi mahasiswa. Melalui kelas akting, penulisan naskah, pementasan, dan festival teater kampus, anggota belajar berani tampil dan bercerita.',
    'teater@ukm.ub.ac.id', 'i-palette', '/img/ukm-teater.jpg',
-   'DIBUKA', 'TERVERIFIKASI', '2026-10-15T00:00:00+07:00', '2026-10-30T23:59:00+07:00', null),
+   'DIBUKA', 'TERVERIFIKASI', '2026-10-15T00:00:00+07:00', '2026-11-30T23:59:00+07:00', null),
 
   ('UKM-ROBOTIKA', 'UKM Robotika', 'KAT-TEKNOLOGI',
    'Rancang inovasi dan ikuti kompetisi robotika bersama tim.',
    'UKM Robotika mempertemukan mahasiswa yang gemar merakit dan memprogram. Kegiatan meliputi kelas dasar elektronika, pengembangan prototipe robot, dan persiapan kompetisi robotika nasional maupun internasional.',
    'robotika@ukm.ub.ac.id', 'i-box', '/img/ukm-robotika.jpg',
-   'DIBUKA', 'TERVERIFIKASI', '2026-10-15T00:00:00+07:00', '2026-10-30T23:59:00+07:00', null),
+   'DIBUKA', 'TERVERIFIKASI', '2026-10-15T00:00:00+07:00', '2026-11-30T23:59:00+07:00', null),
 
   ('UKM-BADMINTON', 'UKM Badminton', 'KAT-OLAHRAGA',
    'Latihan rutin dan kompetisi untuk pecinta bulu tangkis.',
