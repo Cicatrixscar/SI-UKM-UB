@@ -10,7 +10,7 @@
  */
 
 import { pasang } from '../../layouts/AppShell.js'
-import { getDetailUKM, submitPendaftaran } from '../../services/pendaftaranUKMService.js'
+import { getDetailUKM, submitPendaftaran, cekSudahDaftar } from '../../services/pendaftaranUKMService.js'
 import { bolehAksesForm } from '../../utils/permissions.js'
 import { LABEL_STATUS_PENDAFTARAN } from '../../enums/statusPendaftaran.js'
 import { PESAN, TEKS_TOMBOL } from '../../utils/errors.js'
@@ -60,8 +60,18 @@ function formatUkuran(byte) {
   return `${kb.toFixed(0)} KB`
 }
 
-/** Dua kemungkinan penolakan akses form (UKM Ditutup atau tidak ditemukan). */
-function stateDitolak({ ukm, tidakDitemukan }) {
+/** Tiga kemungkinan penolakan akses form (UKM Ditutup, tidak ditemukan, atau sudah terdaftar). */
+function stateDitolak({ ukm, tidakDitemukan, sudahTerdaftar }) {
+  if (sudahTerdaftar) {
+    return `
+      <div class="state">
+        <svg class="ikon ikon--besar" aria-hidden="true"><use href="#i-check-circle"></use></svg>
+        <p>Anda sudah terdaftar di ${ukm?.namaUKM ?? 'UKM ini'}. Satu mahasiswa hanya dapat mendaftar satu kali per UKM.</p>
+        <a class="tombol tombol--utama" href="#/mahasiswa/riwayat">Lihat Riwayat Pendaftaran</a>
+      </div>
+    `
+  }
+
   const judul = tidakDitemukan
     ? PESAN.UKM_TIDAK_DITEMUKAN
     : LABEL_STATUS_PENDAFTARAN[ukm?.statusPendaftaran] ?? ukm?.statusPendaftaran ?? ''
@@ -631,11 +641,20 @@ export async function render(el, ctx = {}) {
   konten.innerHTML = `<div class="state"><span class="spinner" role="status" aria-label="Memuat"></span><p>Memuat form pendaftaran…</p></div>`
 
   try {
-    const ukm = await getDetailUKM(idUKM)
+    const sesi = getSesi()
+    const idMahasiswa = sesi?.idUser || sesi?.id_user
+    const [ukm, sudahTerdaftar] = await Promise.all([
+      getDetailUKM(idUKM),
+      idMahasiswa ? cekSudahDaftar(idMahasiswa, idUKM) : Promise.resolve(false),
+    ])
 
-    const akses = bolehAksesForm(ukm)
+    const akses = bolehAksesForm(ukm, sudahTerdaftar)
     if (!akses.boleh) {
-      konten.innerHTML = stateDitolak({ ukm, tidakDitemukan: akses.tidakDitemukan })
+      konten.innerHTML = stateDitolak({
+        ukm,
+        tidakDitemukan: akses.tidakDitemukan,
+        sudahTerdaftar: akses.sudahTerdaftar,
+      })
       return
     }
 

@@ -59,6 +59,14 @@ describe('bolehAksesForm — V(G)=2', () => {
     const ukm = { ...UKM_DIBUKA, statusPendaftaran: STATUS_PENDAFTARAN.DITUTUP }
     expect(bolehAksesForm(ukm)).toEqual({ boleh: false, tidakDitemukan: false })
   })
+
+  it('menolak bila mahasiswa sudah terdaftar di UKM tersebut', () => {
+    expect(bolehAksesForm(UKM_DIBUKA, true)).toEqual({
+      boleh: false,
+      tidakDitemukan: false,
+      sudahTerdaftar: true,
+    })
+  })
 })
 
 describe('dalamPeriodeAktif — V(G)=7', () => {

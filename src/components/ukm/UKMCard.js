@@ -60,15 +60,21 @@ function media(ukm, dibuka) {
  */
 export function buatUKMCard(ukm, opsi = {}) {
   const dibuka = ukm.statusPendaftaran === STATUS_PENDAFTARAN.DIBUKA
+  const sudahTerdaftar = Boolean(opsi.sudahTerdaftar)
   const el = document.createElement('article')
   el.className = 'kartu-ukm'
   el.dataset.idUkm = ukm.idUKM
   el.dataset.status = ukm.statusPendaftaran
 
-  // [DOKUMEN] AI.md §6: tombol "Daftar" nonaktif untuk UKM DITUTUP.
-  const tombolDaftar = dibuka
-    ? `<a class="tombol tombol--utama" href="#/mahasiswa/daftar/${ukm.idUKM}/data">Daftar</a>`
-    : `<span class="tombol tombol--utama" aria-disabled="true" data-daftar-nonaktif>Daftar</span>`
+  // [DOKUMEN] AI.md §6: tombol "Daftar" nonaktif untuk UKM DITUTUP atau jika mahasiswa sudah terdaftar.
+  let tombolDaftar
+  if (sudahTerdaftar) {
+    tombolDaftar = `<span class="tombol" aria-disabled="true" data-terdaftar title="Anda sudah mendaftar di UKM ini">Sudah Terdaftar</span>`
+  } else if (dibuka) {
+    tombolDaftar = `<a class="tombol tombol--utama" href="#/mahasiswa/daftar/${ukm.idUKM}/data">Daftar</a>`
+  } else {
+    tombolDaftar = `<span class="tombol tombol--utama" aria-disabled="true" data-daftar-nonaktif>Daftar</span>`
+  }
 
   el.innerHTML = `
     ${media(ukm, dibuka)}
@@ -98,7 +104,7 @@ export function buatUKMCard(ukm, opsi = {}) {
   `
   // [DOKUMEN] Brief §5 M-01: "Klik kartu atau 'Lihat Detail': ke M-02."
   el.addEventListener('click', (acara) => {
-    if (acara.target.closest('a, [data-daftar-nonaktif]')) return
+    if (acara.target.closest('a, [data-daftar-nonaktif], [data-terdaftar]')) return
     location.hash = `#/mahasiswa/ukm/${ukm.idUKM}`
   })
 

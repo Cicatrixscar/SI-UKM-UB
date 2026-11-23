@@ -25,8 +25,9 @@ import { config } from '../config.js'
  * @param {object|null} ukm
  * @returns {{boleh: boolean, tidakDitemukan: boolean}}
  */
-export function bolehAksesForm(ukm) {
+export function bolehAksesForm(ukm, sudahTerdaftar = false) {
   if (!ukm) return { boleh: false, tidakDitemukan: true }
+  if (sudahTerdaftar) return { boleh: false, tidakDitemukan: false, sudahTerdaftar: true }
   return { boleh: adalahDibuka(ukm.statusPendaftaran), tidakDitemukan: false }
 }
 

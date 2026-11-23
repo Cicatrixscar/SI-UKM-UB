@@ -22,12 +22,13 @@
  */
 
 import { pasang } from '../../layouts/AppShell.js'
-import { getDetailUKM } from '../../services/pendaftaranUKMService.js'
+import { getDetailUKM, cekSudahDaftar } from '../../services/pendaftaranUKMService.js'
 import { getDaftarKategori } from '../../services/kategoriService.js'
 import { STATUS_PENDAFTARAN, LABEL_STATUS_PENDAFTARAN } from '../../enums/statusPendaftaran.js'
 import { statusTahapTimeline } from '../../utils/permissions.js'
 import { formatTanggal, formatJam, formatSisaWaktu } from '../../utils/format.js'
 import { PESAN, TEKS_TOMBOL } from '../../utils/errors.js'
+import { getSesi } from '../../state/session.js'
 
 /** Tab detail UKM (Brief §8 G14). */
 const TAB = Object.freeze([
@@ -131,13 +132,21 @@ function kartuTanyaJawab() {
 }
 
 /** Kartu "Status Pendaftaran" (kolom kanan). */
-function kartuStatus(ukm) {
+function kartuStatus(ukm, sudahTerdaftar = false) {
   const dibuka = ukm.statusPendaftaran === STATUS_PENDAFTARAN.DIBUKA
   const periode = ukm.periodeAktif ?? {}
 
-  const tombolDaftar = dibuka
-    ? `<a class="tombol tombol--utama tombol--blok" href="#/mahasiswa/daftar/${ukm.idUKM}/data">Daftar Sekarang</a>`
-    : `<span class="tombol tombol--utama tombol--blok" aria-disabled="true" data-daftar-nonaktif>Daftar Sekarang</span>`
+  let tombolDaftar
+  if (sudahTerdaftar) {
+    tombolDaftar = `
+      <span class="tombol tombol--blok" aria-disabled="true" data-terdaftar title="Anda sudah mendaftar di UKM ini">Sudah Terdaftar</span>
+      <a class="tombol tombol--cadangan tombol--blok" href="#/mahasiswa/riwayat" style="margin-top: var(--space-2);">Lihat Riwayat Pendaftaran</a>
+    `
+  } else if (dibuka) {
+    tombolDaftar = `<a class="tombol tombol--utama tombol--blok" href="#/mahasiswa/daftar/${ukm.idUKM}/data">Daftar Sekarang</a>`
+  } else {
+    tombolDaftar = `<span class="tombol tombol--utama tombol--blok" aria-disabled="true" data-daftar-nonaktif>Daftar Sekarang</span>`
+  }
 
   const sisa = dibuka && periode.tanggalTutup
     ? `
@@ -174,7 +183,7 @@ function kartuStatus(ukm) {
 }
 
 /** Wujud sukses halaman. */
-function isiSukses(ukm, namaKategori, tabAktif) {
+function isiSukses(ukm, namaKategori, tabAktif, sudahTerdaftar = false) {
   const persyaratan = ukm.periodeAktif?.persyaratanDokumen ?? []
 
   const bagian =
@@ -225,7 +234,7 @@ function isiSukses(ukm, namaKategori, tabAktif) {
       </div>
 
       <aside class="detail__kanan">
-        ${kartuStatus(ukm)}
+        ${kartuStatus(ukm, sudahTerdaftar)}
         <section class="kartu kartu--lembut">
           <h2 class="kartu__judul">Ada pertanyaan?</h2>
           <p class="text-muted">Lihat tab Tanya Jawab atau hubungi pengurus UKM.</p>
@@ -256,7 +265,13 @@ export async function render(el, ctx = {}) {
   konten.innerHTML = `<div class="state"><span class="spinner" role="status" aria-label="Memuat"></span><p>Memuat detail UKM…</p></div>`
 
   try {
-    const [ukm, kategori] = await Promise.all([getDetailUKM(idUKM), getDaftarKategori()])
+    const sesi = getSesi()
+    const idMahasiswa = sesi?.idUser || sesi?.id_user
+    const [ukm, kategori, sudahTerdaftar] = await Promise.all([
+      getDetailUKM(idUKM),
+      getDaftarKategori(),
+      idMahasiswa ? cekSudahDaftar(idMahasiswa, idUKM) : Promise.resolve(false),
+    ])
 
     if (!ukm) {
       konten.innerHTML = isiTidakDitemukan()
@@ -267,7 +282,7 @@ export async function render(el, ctx = {}) {
     let tabAktif = 'deskripsi'
 
     const gambar = () => {
-      konten.innerHTML = isiSukses(ukm, kat?.namaKategori, tabAktif)
+      konten.innerHTML = isiSukses(ukm, kat?.namaKategori, tabAktif, sudahTerdaftar)
       konten.querySelectorAll('[data-tab]').forEach((t) =>
         t.addEventListener('click', () => {
           tabAktif = t.dataset.tab

@@ -238,6 +238,13 @@ export async function submitPendaftaran(dataForm, berkas) {
       return { berhasil: false, idPendaftaran: null, pesan: PESAN.UKM_TIDAK_DITEMUKAN }
     }
 
+    if (dataForm?.idMahasiswa && dataForm?.idUKM) {
+      const sudah = await cekSudahDaftar(dataForm.idMahasiswa, dataForm.idUKM)
+      if (sudah) {
+        return { berhasil: false, idPendaftaran: null, pesan: 'Anda sudah terdaftar di UKM ini.' }
+      }
+    }
+
     const data = validasiDataDiri(dataForm)
     if (!data.valid) {
       return { berhasil: false, idPendaftaran: null, pesan: data.pesan }
@@ -295,6 +302,55 @@ export async function getRiwayatPendaftaran(idMahasiswa) {
     emailUKM: p.ukm?.email_ukm ?? '',
     namaKategori: p.ukm?.kategori?.nama_kategori ?? '',
   }))
+}
+
+/**
+ * Ambil himpunan id_ukm yang sudah didaftari oleh seorang mahasiswa.
+ * @param {string} idMahasiswa
+ * @returns {Promise<Set<string>>}
+ */
+export async function getIdUKMTerdaftarMahasiswa(idMahasiswa) {
+  if (!idMahasiswa) return new Set()
+  try {
+    const { data, error } = await ambilSupabase()
+      .from('pendaftaran')
+      .select('id_ukm')
+      .eq('id_mahasiswa', idMahasiswa)
+    if (error) {
+      console.error(error)
+      return new Set()
+    }
+    return new Set((data ?? []).map((row) => row.id_ukm))
+  } catch (err) {
+    console.error(err)
+    return new Set()
+  }
+}
+
+/**
+ * Cek apakah seorang mahasiswa sudah terdaftar di UKM tertentu.
+ * @param {string} idMahasiswa
+ * @param {string} idUKM
+ * @returns {Promise<boolean>}
+ */
+export async function cekSudahDaftar(idMahasiswa, idUKM) {
+  if (!idMahasiswa || !idUKM) return false
+  try {
+    const { data, error } = await ambilSupabase()
+      .from('pendaftaran')
+      .select('id_pendaftaran')
+      .eq('id_mahasiswa', idMahasiswa)
+      .eq('id_ukm', idUKM)
+      .maybeSingle()
+    if (error) {
+      console.error(error)
+      return false
+    }
+    return Boolean(data)
+  } catch (err) {
+    console.error(err)
+    return false
+  }
 }
 
 /**

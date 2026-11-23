@@ -18,11 +18,12 @@
  */
 
 import { pasang } from '../../layouts/AppShell.js'
-import { getKatalogUKM } from '../../services/pendaftaranUKMService.js'
+import { getKatalogUKM, getIdUKMTerdaftarMahasiswa } from '../../services/pendaftaranUKMService.js'
 import { getDaftarKategori } from '../../services/kategoriService.js'
 import { buatUKMCard } from '../../components/ukm/UKMCard.js'
 import { PESAN, TEKS_TOMBOL } from '../../utils/errors.js'
 import { LABEL_STATUS_PENDAFTARAN, STATUS_PENDAFTARAN } from '../../enums/statusPendaftaran.js'
+import { getSesi } from '../../state/session.js'
 
 /** Status tampilan halaman (di-reset setiap render). */
 const tampilan = {
@@ -36,6 +37,7 @@ const tampilan = {
 /** Data mentah hasil service (di-reset setiap render). */
 let daftarSemua = []
 let kategoriSemua = []
+let idUkmTerdaftar = new Set()
 
 function ikon(id) {
   return `<svg class="ikon" aria-hidden="true"><use href="#${id}"></use></svg>`
@@ -175,7 +177,8 @@ function isiSukses(wadah) {
   grid.className = 'katalog-grid'
   for (const ukm of potongan) {
     const kat = kategoriSemua.find((k) => k.idKategori === ukm.idKategori)
-    grid.appendChild(buatUKMCard(ukm, { namaKategori: kat?.namaKategori }))
+    const sudahTerdaftar = idUkmTerdaftar.has(ukm.idUKM)
+    grid.appendChild(buatUKMCard(ukm, { namaKategori: kat?.namaKategori, sudahTerdaftar }))
   }
 
   wadah.replaceChildren(grid)
@@ -260,9 +263,16 @@ export async function render(el, ctx = {}) {
 
   try {
     // AI.md §4: halaman hanya memanggil services/, tidak mengimpor mock.
-    const [daftar, kategori] = await Promise.all([getKatalogUKM(), getDaftarKategori()])
+    const sesi = getSesi()
+    const idMahasiswa = sesi?.idUser || sesi?.id_user
+    const [daftar, kategori, terdaftar] = await Promise.all([
+      getKatalogUKM(),
+      getDaftarKategori(),
+      idMahasiswa ? getIdUKMTerdaftarMahasiswa(idMahasiswa) : Promise.resolve(new Set()),
+    ])
     daftarSemua = daftar
     kategoriSemua = kategori
+    idUkmTerdaftar = terdaftar ?? new Set()
 
     if (!daftar.length) {
       wadah.innerHTML = `

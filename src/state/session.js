@@ -13,20 +13,53 @@
 
 import { ROLES } from '../enums/roles.js'
 
+const KUNCI_STORAGE = 'si_ukm_sesi'
+
 let sesiAktif = null
+
+function muatSesi() {
+  if (sesiAktif) return sesiAktif
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const tersimpan = localStorage.getItem(KUNCI_STORAGE)
+      if (tersimpan) {
+        sesiAktif = JSON.parse(tersimpan)
+      }
+    }
+  } catch (e) {
+    console.error('Gagal membaca sesi dari storage:', e)
+  }
+  return sesiAktif
+}
 
 /** @returns {{idUser:string,nama:string,email:string,role:string}|null} */
 export function getSesi() {
-  return sesiAktif
+  return sesiAktif ?? muatSesi()
 }
 
 export function setSesi(pengguna) {
   sesiAktif = pengguna ? { ...pengguna } : null
+  try {
+    if (typeof localStorage !== 'undefined') {
+      if (sesiAktif) {
+        localStorage.setItem(KUNCI_STORAGE, JSON.stringify(sesiAktif))
+      } else {
+        localStorage.removeItem(KUNCI_STORAGE)
+      }
+    }
+  } catch (e) {
+    console.error('Gagal menyimpan sesi ke storage:', e)
+  }
   return sesiAktif
 }
 
 export function hapusSesi() {
   sesiAktif = null
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem(KUNCI_STORAGE)
+    }
+  } catch (e) {}
 }
 
 export function sedangLogin() {
