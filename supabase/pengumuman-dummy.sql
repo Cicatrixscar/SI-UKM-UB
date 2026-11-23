@@ -1,6 +1,6 @@
 -- =============================================================================
--- Script: Simulasi Pengumuman Hasil Seleksi & Notifikasi Dummy
--- Jalankan di: Supabase Dashboard -> SQL Editor
+-- Script: Simulasi Pengumuman Hasil Seleksi & Notifikasi Backend (Supabase)
+-- Jalankan di: Supabase Dashboard -> SQL Editor (Project: ovllmshveqvfiyeoeuzj)
 -- Target Pengguna: Ascarya Haldis (USR-FKCPHQD)
 -- Target Pendaftaran: UKM Basket (PD-2026-1887)
 -- =============================================================================
@@ -37,7 +37,7 @@ INSERT INTO notifikasi (
     'Pendaftaran berhasil dikirim · UKM Basket',
     'Pendaftaran Anda dengan No. UKM-2026-1887 telah berhasil masuk ke sistem.',
     true,
-    now() - interval '3 minutes',
+    now() - interval '5 minutes',
     'Pendaftaran',
     'Lihat detail',
     '#/mahasiswa/riwayat/PD-2026-1887'
@@ -57,4 +57,5 @@ ON CONFLICT (id_notifikasi) DO UPDATE
 SET 
   judul = excluded.judul,
   pesan = excluded.pesan,
-  dibaca = excluded.dibaca;
+  dibaca = excluded.dibaca,
+  timestamp = excluded.timestamp;
