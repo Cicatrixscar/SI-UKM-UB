@@ -124,11 +124,4 @@ Berikut pembuktian bahwa Class di EA bukan sekadar gambar, melainkan memiliki im
 
 ---
 
-## 5. Ringkasan Kesiapan Menjawab Dosen
 
-| Pertanyaan Dosen | Referensi Jawaban Teknis |
-| :--- | :--- |
-| *"Di mana kalian menerapkan enkripsi password?"* | Di `src/utils/crypto.js` menggunakan standar `crypto.subtle.digest('SHA-512', salt + password)` dengan Salt email unik per user. |
-| *"Bagaimana pencegahan berkas berbahaya atau ukuran raksasa?"* | Di `src/utils/validatorBerkas.js` dengan fungsi `validasiUkuranBerkas(file, 5 * 1024 * 1024)` dan `validasiTipeBerkas(file, ['application/pdf', 'image/jpeg'])`. |
-| *"Kenapa di Sequence Diagram ada boundary terpisah untuk form pendaftaran?"* | Karena sistem menerapkan prinsip **High Cohesion & Single Responsibility**. Katalog hanya bertugas menampilkan daftar, sedangkan form pendaftaran diisolasi di `FormPendaftaranPage.js` dengan wizard 3 tahap. |
-| *"Bagaimana data di tabel database PostgreSQL terhubung ke JavaScript?"* | Melalui modul **Data Mapper** di `src/services/pemetaanBaris.js` yang menerjemahkan kolom `snake_case` PostgreSQL menjadi atribut `camelCase` model OOP. |

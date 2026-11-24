@@ -1,7 +1,7 @@
 # Panduan Arsitektur & Penjelasan Kode SI UKM UB
-**Bahan Presentasi / Asistensi Dosen Praktikum RSI**
+**Dokumentasi Teknis Sistem Informasi Pendaftaran UKM UB**
 
-Dokumen ini disusun untuk memudahkan penjelasan kepada dosen terkait struktur arsitektur sistem informasi, penerapan prinsip rekayasa perangkat lunak modern (**Single Responsibility Principle / SRP**, **Separation of Concerns**, dan **Boundary-Control-Entity / BCE**), serta bagian kode krusial di setiap file.
+Dokumen ini menjelaskan struktur arsitektur sistem informasi, penerapan prinsip rekayasa perangkat lunak modern (**Single Responsibility Principle / SRP**, **Separation of Concerns**, dan **Boundary-Control-Entity / BCE**), serta bagian kode krusial di setiap file.
 
 ---
 
@@ -40,7 +40,7 @@ flowchart LR
 
 ## 2. Struktur Folder `src/` & Klasifikasi MVC Beserta Alasannya
 
-Berikut klasifikasi peran setiap folder di dalam `src/` berdasarkan arsitektur **MVC**, lengkap dengan **alasan arsitekturalnya** agar kamu siap menjawab saat ditanya dosen:
+Berikut klasifikasi peran setiap folder di dalam `src/` berdasarkan arsitektur **MVC**, lengkap dengan alasan arsitekturalnya:
 
 | Folder / File | Klasifikasi MVC | Tanggung Jawab Utama | Alasan Kenapa Masuk Kategori Ini |
 | :--- | :--- | :--- | :--- |
@@ -146,19 +146,4 @@ Folder dan file di luar `src/` bertugas mengelola **lingkungan pengembangan (dev
 
 ---
 
-## 4. Cara Menjawab Pertanyaan Umum Dosen
 
-### Q1: "Bagaimana sistem mencegah seorang mahasiswa mendaftar lebih dari satu kali di UKM yang sama?"
-> **Jawaban:**  
-> "Kami menerapkan perlindungan berlapis (Defense in Depth):
-> 1. **Di Sisi UI (Katalog & Detail)**: Halaman katalog memanggil `getIdUKMTerdaftarMahasiswa(idUser)`. Jika ID UKM sudah ada di tabel pendaftaran mahasiswa tersebut, tombol 'Daftar' otomatis dinonaktifkan (`aria-disabled="true"`) dan berlabel 'Sudah Terdaftar'.
-> 2. **Di Sisi Service/Logika**: Fungsi `submitPendaftaran()` mengecek kembali dengan memanggil `cekSudahDaftar(idMahasiswa, idUKM)` sebelum data disimpan. Jika sudah ada, proses dibatalkan.
-> 3. **Di Sisi Database Supabase**: Kami memasang `UNIQUE INDEX` pada kombinasi kolom `(id_ukm, id_mahasiswa)` di tabel `pendaftaran`, sehingga secara integritas data tidak mungkin terjadi duplikasi record."
-
-### Q2: "Mengapa menggunakan pola pemisahan folder seperti Services, Models, Pages, dan Components?"
-> **Jawaban:**  
-> "Kami menerapkan prinsip **Single Responsibility Principle (SRP)** dan **Separation of Concerns**.
-> - Komponen UI (`components/`) hanya bertanggung jawab merender tampilan.
-> - Halaman (`pages/`) hanya bertanggung jawab mengatur alur tampilan dan memanggil services.
-> - Services (`services/`) bertanggung jawab penuh terhadap komunikasi database Supabase.
-> Dengan pemisahan ini, kode menjadi sangat modular, mudah diuji (unit testing), dan jika ada perubahan struktur database, kita cukup memperbarui file service tanpa harus merombak halaman antarmuka."

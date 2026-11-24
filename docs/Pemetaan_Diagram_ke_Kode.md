@@ -48,14 +48,4 @@ Di dalam file `Class Diagram 2.qea`, terdapat **15 Class**. Berikut lokasi imple
 
 ---
 
-## 3. Cara Menjelaskan Hubungan Diagram vs Kode ke Dosen Besok
 
-Saat dosen menunjuk salah satu diagram dan bertanya: *"Bagaimana kalian membuktikan diagram ini benar-benar di-coding di aplikasi kalian?"*
-
-Gunakan formula jawaban berikut:
-
-1. **Untuk Alur Pendaftaran (Sequence Diagram Wizard 3-Langkah):**
-   > *"Di diagram terdapat 3 lifeline boundary yang terpisah: `KatalogUKMPage`, `DetailUKMPage`, dan `FormPendaftaranPage`. Di kode kami, ini diimplementasikan secara modular pada folder `src/pages/mahasiswa/`. Logika pengiriman datanya dikontrol oleh `pendaftaranUKMService.js`, di mana data formulir masuk ke tabel `pendaftaran` dan file fisiknya diunggah ke Supabase Cloud Storage bucket `dokumen` lalu URL-nya disimpan di tabel `dokumen_pendaftaran`."*
-
-2. **Untuk Class Diagram (Entitas & Relasi):**
-   > *"Setiap kelas di Class Diagram memiliki padanan berkas model OOP di folder `src/models/`, misalnya `UKM.js`, `Pendaftaran.js`, dan `Pengguna.js`. Struktur atributnya sinkron 1:1 dengan tabel database PostgreSQL Supabase yang kami definisikan di `supabase/schema.sql`. Dan untuk menjembatani perbedaan snake_case di database dengan camelCase di JavaScript, kami menggunakan pola Data Mapper pada `src/services/pemetaanBaris.js`."*
