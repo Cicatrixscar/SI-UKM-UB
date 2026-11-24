@@ -85,7 +85,7 @@ Folder dan file di luar `src/` bertugas mengelola **lingkungan pengembangan (dev
 
 ---
 
-## 3. Rincian Setiap File & Bagian Kode Krusial
+## 4. Rincian Setiap File & Bagian Kode Krusial
 
 ### A. Root (`src/`)
 * [config.js](file:///d:/Tugas%20Kuliah/Semester%203/Praktikum%20RSI/SI%20UKM%20UB/app/src/config.js): Menyimpan kredensial Supabase (`supabaseUrl`, `supabaseAnonKey`) dan storage bucket.
@@ -145,5 +145,58 @@ Folder dan file di luar `src/` bertugas mengelola **lingkungan pengembangan (dev
 * [validatorAuth.js](file:///d:/Tugas%20Kuliah/Semester%203/Praktikum%20RSI/SI%20UKM%20UB/app/src/utils/validatorAuth.js): Memastikan email yang didaftarkan wajib memiliki domain resmi `@student.ub.ac.id`.
 
 ---
+
+## 5. Mekanisme Trigger & Event Lifecycle Sistem
+
+Aplikasi ini mengadopsi pola **Event-Driven Architecture** di sisi klien (*Client-Side Reactive Events*). Berikut pemetaan lengkap kapan dan di bagian kode mana suatu aksi atau *event* terpicu:
+
+### A. Trigger Siklus Hidup & Navigasi Halaman (Routing Lifecycle)
+
+| Peristiwa / Trigger | File & Lokasi Kode | Cara Kerja & Kode yang Tereksekusi |
+| :--- | :--- | :--- |
+| **URL Hash Berubah** (`#/mahasiswa/...`) | `src/router.js` (`mulaiRouter`) | Mencegat event bawaan browser `window.addEventListener('hashchange', jalankan)`. Fungsi ini membaca URL hash, mencocokkan rute yang terdaftar, dan mengeksekusi controller rute. |
+| **Navigasi Manual dari Kode** | `src/router.js` (`navigasi(path)`) | Dipanggil saat redirect (misal setelah login sukses). Mengubah `location.hash` atau men-dispatch `new HashChangeEvent('hashchange')`. |
+| **Pengecekan Akses (Route Guard)** | `src/router.js` (`renderRute`) | Sebelum memuat halaman yang dilindungi (`rute.perluLogin`), sistem mengecek `getSesi()`. Jika `null`, halaman dibatalkan dan otomatis dialihkan ke pesan sesi habis / login. |
+| **Halaman Pertama Kali Terbuka (Page Mount)** | Setiap berkas di `src/pages/**` (`export async function render(el, ctx)`) | Dieksekusi otomatis oleh router saat rute cocok. Di awal fungsi `render()`, halaman memasang rangka layout via `pasang(el, ...)` dan menampilkan skeleton loading/spinner. |
+
+---
+
+### B. Trigger Pengambilan Data Awal (Lifecycle Data Fetching)
+
+Ketika suatu halaman dibuka, fungsi `render()` langsung memicu pemanggilan asinkronus ke layer Service untuk mengambil data terbaru dari Supabase:
+
+| Halaman Terbuka | File & Fungsi Pemanggil | Service & Query yang Dipicu |
+| :--- | :--- | :--- |
+| **Katalog UKM Dibuka** | `KatalogUKMPage.js` di awal `render()` | Menjalankan `Promise.all([getKatalogUKM(), getDaftarKategori(), getIdUKMTerdaftarMahasiswa(idUser)])` secara paralel ke database sebelum merender daftar kartu. |
+| **Detail UKM Dibuka** | `DetailUKMPage.js` di awal `render()` | Memanggil `getDetailUKM(idUKM)` dan `cekSudahDaftar(idUser, idUKM)` untuk membaca informasi visi-misi, syarat berkas, dan mengunci tombol jika sudah terdaftar. |
+| **Riwayat Pendaftaran Dibuka** | `RiwayatPendaftaranPage.js` di awal `render()` | Memanggil `getRiwayatPendaftaran(idUser)` untuk menarik seluruh progres seleksi dan catatan verifikasi admin. |
+| **Hasil Seleksi Dibuka** | `HasilSeleksiPage.js` di awal `render()` | Memanggil `getHasilSeleksi(idUser)` untuk membaca status keputusan akhir (*DITERIMA/DITOLAK*) dan panduan *langkah_selanjutnya*. |
+| **Navbar Dimuat (AppShell)** | `src/layouts/AppShell.js` | Memanggil `getNotifikasiBelumDibaca(idUser)` untuk menghitung badge counter angka merah pada lonceng notifikasi. |
+
+---
+
+### C. Trigger Interaksi Pengguna & Input Formulir (DOM Events)
+
+Interaksi pengguna pada elemen halaman ditangkap menggunakan *event listeners* spesifik:
+
+| Aksi Pengguna (Trigger) | Elemen & File | Penanganan Event di Kode |
+| :--- | :--- | :--- |
+| **Mengetik Pencarian UKM** | `input[data-cari]` di `KatalogUKMPage.js` | Event `input`: `inpCari.addEventListener('input', (e) => { tampilan.cari = e.target.value; segarkan(); })`. Menyaring array UKM secara real-time tanpa reload halaman. |
+| **Mengubah Filter Kategori / Status** | `select[data-kategori]` di `KatalogUKMPage.js` | Event `change`: `select.addEventListener('change', ...)` yang mereset halaman paginasi ke halaman 1 dan memfilter kartu UKM. |
+| **Mengklik Kartu UKM** | `.kartu-ukm` di `src/components/ukm/UKMCard.js` | Event `click`: `el.addEventListener('click', ...)` mengubah URL hash ke `#/mahasiswa/ukm/${idUKM}` (diabaikan jika yang diklik tombol action). |
+| **Submit Formulir Login** | `<form>` di `LoginMahasiswaPage.js` | Event `submit`: `form.addEventListener('submit', async (e) => { e.preventDefault(); ... })`. Memvalidasi format email via `validasiEmailMahasiswa()` sebelum memanggil `login()`. |
+| **Submit Pendaftaran (Tahap 3)** | Tombol "Kirim Pendaftaran" di `FormPendaftaranPage.js` | Event `click`: Membuka modal konfirmasi (`ConfirmDialog.js`), lalu mengeksekusi `submitPendaftaran(dataForm, berkas)` untuk upload berkas ke Supabase Storage. |
+| **Memilih / Drop File Berkas** | `<input type="file">` di `FormPendaftaranPage.js` | Event `change` / `drop`: Memicu `validasiUkuranBerkas(file, 5MB)` dan `validasiTipeBerkas(file)`. Jika valid, memunculkan ikon centang hijau dan nama file. |
+| **Mengklik Notifikasi** | Item notifikasi di `NotifikasiPage.js` | Event `click`: Memanggil `tandaiDibaca(idNotifikasi)` ke database Supabase untuk mengubah flag `dibaca = true`, lalu mengarahkan ke halaman aksi (`aksi_jalur`). |
+
+---
+
+### D. Trigger Otomatis Berbasis Waktu (Timer & Live Calculation)
+
+| Mekanisme | File & Lokasi Kode | Perilaku Sistem |
+| :--- | :--- | :--- |
+| **Hitung Mundur Sisa Waktu Pendaftaran** | `src/utils/format.js` (`formatSisaWaktu`) & `UKMCard.js` | Dihitung secara dinamis membandingkan `tanggal_tutup` di database dengan waktu riil saat kartu dirender (`"Tutup dalam X hari Y jam"`). |
+| **Penguncian Akses Otomatis** | `src/utils/permissions.js` (`dalamPeriodeAktif`) | Jika tanggal saat ini melewati `tanggal_tutup`, fungsi otomatis mengembalikan nilai `false`, menyebabkan formulir pendaftaran terkunci dan tombol berubah menjadi nonaktif. |
+
 
 
