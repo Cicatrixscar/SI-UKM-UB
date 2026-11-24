@@ -68,7 +68,7 @@ sequenceDiagram
     DB-->>Service: 5. Data Pengguna (termasuk password_hash)
     Service->>Crypto: 6. verifikasiPassword(passwordInput, hash, emailBersih)
     Crypto-->>Service: 7. Cocok (true)
-    Service->>State: 8. setSesi(user) (Simpan ke localStorage 'si_ukm_sesi')
+    Service->>State: 8. setSesi(pengguna) (Simpan ke localStorage 'si_ukm_sesi')
     Service-->>View: 9. Berhasil (Objek Sesi Mahasiswa)
     View-->>Mahasiswa: 10. Navigasi ke Katalog UKM
 ```
